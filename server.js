@@ -43,6 +43,9 @@ const io = new Server(server);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Trust proxy - necessary when behind reverse proxies like Render.com, Heroku, Koyeb, etc.
+app.set('trust proxy', true);
+
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
