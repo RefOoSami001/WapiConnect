@@ -15,38 +15,52 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="bi bi-whatsapp"></i>WapiConnect
+                <div class="brand-logo">
+                    <i class="bi bi-whatsapp"></i>
+                </div>
+                WapiConnect
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" id="mobileMenuToggle">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="navbar-collapse" id="navbarNav">
                 <div class="navbar-tabs">
                     <a href="#" class="navbar-tab active" data-bs-toggle="tab" data-bs-target="#sessions">
-                        <i class="bi bi-phone"></i>Sessions
+                        <i class="bi bi-phone"></i>
+                        <span>Sessions</span>
                     </a>
                     <a href="#" class="navbar-tab" data-bs-toggle="tab" data-bs-target="#api-docs">
-                        <i class="bi bi-code-slash"></i>API Docs
+                        <i class="bi bi-code-slash"></i>
+                        <span>API Docs</span>
                     </a>
                 </div>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle user-profile" href="#" id="userDropdown" role="button"
                             data-bs-toggle="dropdown">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
                             <div class="user-info">
                                 <span class="user-name" id="user-name">User</span>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#" onclick="logout()">
-                                    <i class="bi bi-box-arrow-right"></i>Logout
-                                </a></li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="logout()">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay"></div>
 
     <!-- Tab Content -->
     <div class="tab-content" id="dashboardTabsContent">
@@ -128,227 +142,368 @@
                 <div class="api-content">
                     <!-- Authentication Section -->
                     <div class="main-content active" id="auth-section">
-                        <div class="parameter-section">
-                            <h3><i class="bi bi-shield-lock me-2"></i>Authentication</h3>
-                            <p>All API requests require authentication using a Bearer token.</p>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Your API Token</label>
-                                <div class="token-value" id="api-token-display-new">
-                                    <span class="token-prefix">Bearer </span>
-                                    <span class="token-content">Loading...</span>
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon">
+                                    <i class="bi bi-shield-lock"></i>
                                 </div>
-                                <button class="action-button" onclick="copyToken()">
-                                    <i class="bi bi-clipboard me-2"></i>Copy Token
-                                </button>
+                                <div class="api-card-title">
+                                    <h3>Authentication</h3>
+                                    <p>All API requests require authentication using a Bearer token.</p>
+                                </div>
+                            </div>
+                            <div class="api-card-body">
+                                <div class="parameter-group">
+                                    <label class="parameter-label">Your API Token</label>
+                                    <div class="token-value" id="api-token-display-new">
+                                        <span class="token-prefix">Bearer </span>
+                                        <span class="token-content">Loading...</span>
+                                    </div>
+                                    <button class="action-button" onclick="copyToken()">
+                                        <i class="bi bi-clipboard me-2"></i>Copy Token
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Sessions Section -->
                     <div class="main-content" id="sessions-section">
-                        <div class="parameter-section">
-                            <h3><i class="bi bi-list-check me-2"></i>Check Sessions</h3>
-                            <p>Get all WhatsApp sessions for the authenticated user.</p>
-
-                            <button class="action-button" onclick="runApiRequest('check-sessions')">
-                                <i class="bi bi-arrow-repeat me-2"></i>Get Sessions
-                            </button>
+                        <!-- Check Sessions -->
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon">
+                                    <i class="bi bi-list-check"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Check Sessions</h3>
+                                    <span class="api-method method-get">GET</span>
+                                    <span class="api-endpoint">/api/check-sessions</span>
+                                </div>
+                            </div>
+                            <div class="api-card-body">
+                                <p>Get all WhatsApp sessions for the authenticated user.</p>
+                                <button class="action-button" onclick="runApiRequest('check-sessions')">
+                                    <i class="bi bi-arrow-repeat me-2"></i>Get Sessions
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="parameter-section">
-                            <h3><i class="bi bi-trash me-2"></i>Delete Session</h3>
-                            <p>Delete a WhatsApp session.</p>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Session ID</label>
-                                <input type="text" class="parameter-input" id="delete-session-id"
-                                    placeholder="Enter session ID">
+                        <!-- Delete Session -->
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon delete-icon">
+                                    <i class="bi bi-trash"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Delete Session</h3>
+                                    <span class="api-method method-delete">DELETE</span>
+                                    <span class="api-endpoint">/api/delete-session/{id}</span>
+                                </div>
                             </div>
+                            <div class="api-card-body">
+                                <p>Delete a WhatsApp session by ID.</p>
+                                <div class="parameter-group">
+                                    <label class="parameter-label">Session ID</label>
+                                    <input type="text" class="parameter-input" id="delete-session-id"
+                                        placeholder="Enter session ID">
+                                </div>
 
-                            <button class="action-button" onclick="runApiRequest('delete-session')">
-                                <i class="bi bi-trash me-2"></i>Delete Session
-                            </button>
+                                <button class="action-button delete-button" onclick="runApiRequest('delete-session')">
+                                    <i class="bi bi-trash me-2"></i>Delete Session
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Messaging Section -->
                     <div class="main-content" id="messaging-section">
-                        <div class="parameter-section">
-                            <h3>Send Message</h3>
-                            <p>Send a message to one or more WhatsApp numbers.</p>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Session ID</label>
-                                <input type="text" class="parameter-input" id="send-session-id"
-                                    placeholder="Enter session ID">
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon message-icon">
+                                    <i class="bi bi-chat-dots"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Send Message</h3>
+                                    <span class="api-method method-post">POST</span>
+                                    <span class="api-endpoint">/api/send-message</span>
+                                </div>
                             </div>
+                            <div class="api-card-body">
+                                <p>Send a message to one or more WhatsApp numbers.</p>
 
-                            <div class="parameter-group">
-                                <label class="parameter-label">Phone Numbers</label>
-                                <textarea class="parameter-input" id="send-numbers" rows="3"
-                                    placeholder="Enter phone numbers, one per line"></textarea>
-                                <div class="parameter-desc">Phone numbers separated by newlines</div>
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Session ID</label>
+                                        <input type="text" class="parameter-input" id="send-session-id"
+                                            placeholder="Enter session ID">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Phone Numbers</label>
+                                        <textarea class="parameter-input" id="send-numbers"
+                                            placeholder="Enter phone numbers, one per line"></textarea>
+                                        <div class="parameter-desc">Phone numbers separated by newlines</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Message</label>
+                                        <textarea class="parameter-input" id="send-message"
+                                            placeholder="Enter your message"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Image (Optional)</label>
+                                        <select class="parameter-input" id="image-type">
+                                            <option value="none">No Image</option>
+                                            <option value="url">Image URL</option>
+                                            <option value="base64">Base64 Image</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group" id="image-url-group" style="display:none;">
+                                        <label class="parameter-label">Image URL</label>
+                                        <input type="text" class="parameter-input" id="image-url"
+                                            placeholder="Enter image URL">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group" id="image-base64-group" style="display:none;">
+                                        <label class="parameter-label">Base64 Image</label>
+                                        <textarea class="parameter-input" id="image-base64"
+                                            placeholder="Enter base64 image data"></textarea>
+                                    </div>
+                                </div>
+
+                                <button class="action-button" onclick="runApiRequest('send-message')">
+                                    <i class="bi bi-send me-2"></i>Send Message
+                                </button>
                             </div>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Message</label>
-                                <textarea class="parameter-input" id="send-message" rows="3"
-                                    placeholder="Enter your message"></textarea>
-                            </div>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Image (Optional)</label>
-                                <select class="parameter-input" id="image-type">
-                                    <option value="none">No Image</option>
-                                    <option value="url">Image URL</option>
-                                    <option value="base64">Base64 Image</option>
-                                </select>
-                            </div>
-
-                            <div class="parameter-group" id="image-url-group" style="display:none;">
-                                <label class="parameter-label">Image URL</label>
-                                <input type="text" class="parameter-input" id="image-url" placeholder="Enter image URL">
-                            </div>
-
-                            <div class="parameter-group" id="image-base64-group" style="display:none;">
-                                <label class="parameter-label">Base64 Image</label>
-                                <textarea class="parameter-input" id="image-base64" rows="3"
-                                    placeholder="Enter base64 image data"></textarea>
-                            </div>
-
-                            <button class="action-button" onclick="runApiRequest('send-message')">
-                                Send Message
-                            </button>
                         </div>
                     </div>
 
                     <!-- Contacts Section -->
                     <div class="main-content" id="contacts-section">
-                        <div class="parameter-section">
-                            <h3>Get Contacts</h3>
-                            <p>Get contacts from a WhatsApp session.</p>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Session ID</label>
-                                <input type="text" class="parameter-input" id="contacts-session-id"
-                                    placeholder="Enter session ID">
+                        <!-- Get Contacts -->
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon contacts-icon">
+                                    <i class="bi bi-person-lines-fill"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Get Contacts</h3>
+                                    <span class="api-method method-post">POST</span>
+                                    <span class="api-endpoint">/api/get-contacts</span>
+                                </div>
                             </div>
+                            <div class="api-card-body">
+                                <p>Get contacts from a WhatsApp session.</p>
 
-                            <div class="parameter-group">
-                                <label class="parameter-label">Source</label>
-                                <select class="parameter-input" id="contacts-source">
-                                    <option value="contacts">Individual Contacts</option>
-                                    <option value="groups">Groups</option>
-                                </select>
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Session ID</label>
+                                        <input type="text" class="parameter-input" id="contacts-session-id"
+                                            placeholder="Enter session ID">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Source</label>
+                                        <select class="parameter-input" id="contacts-source">
+                                            <option value="contacts">Individual Contacts</option>
+                                            <option value="groups">Groups</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button class="action-button" onclick="runApiRequest('get-contacts')">
+                                    <i class="bi bi-people me-2"></i>Get Contacts
+                                </button>
                             </div>
-
-                            <button class="action-button" onclick="runApiRequest('get-contacts')">
-                                Get Contacts
-                            </button>
                         </div>
 
-                        <div class="parameter-section">
-                            <h3>Get Group Members</h3>
-                            <p>Get members of a specific WhatsApp group.</p>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Session ID</label>
-                                <input type="text" class="parameter-input" id="group-session-id"
-                                    placeholder="Enter session ID">
+                        <!-- Get Group Members -->
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon group-icon">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Get Group Members</h3>
+                                    <span class="api-method method-post">POST</span>
+                                    <span class="api-endpoint">/api/get-group-members</span>
+                                </div>
                             </div>
+                            <div class="api-card-body">
+                                <p>Get members of a specific WhatsApp group.</p>
 
-                            <div class="parameter-group">
-                                <label class="parameter-label">Group ID</label>
-                                <input type="text" class="parameter-input" id="group-id" placeholder="Enter group ID">
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Session ID</label>
+                                        <input type="text" class="parameter-input" id="group-session-id"
+                                            placeholder="Enter session ID">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Group ID</label>
+                                        <input type="text" class="parameter-input" id="group-id"
+                                            placeholder="Enter group ID">
+                                    </div>
+                                </div>
+
+                                <button class="action-button" onclick="runApiRequest('get-group-members')">
+                                    <i class="bi bi-people-fill me-2"></i>Get Group Members
+                                </button>
                             </div>
-
-                            <button class="action-button" onclick="runApiRequest('get-group-members')">
-                                Get Group Members
-                            </button>
                         </div>
                     </div>
 
                     <!-- Auto-Reply Section -->
                     <div class="main-content" id="auto-reply-section">
-                        <div class="parameter-section">
-                            <h3>Create Auto-Reply Rule</h3>
-                            <p>Create a new auto-reply rule for a WhatsApp session.</p>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Rule Name</label>
-                                <input type="text" class="parameter-input" id="rule-name" placeholder="Enter rule name">
+                        <!-- Create Auto-Reply Rule -->
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon rule-icon">
+                                    <i class="bi bi-plus-circle"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Create Auto-Reply Rule</h3>
+                                    <span class="api-method method-post">POST</span>
+                                    <span class="api-endpoint">/api/auto-reply-rules</span>
+                                </div>
                             </div>
+                            <div class="api-card-body">
+                                <p>Create a new auto-reply rule for a WhatsApp session.</p>
 
-                            <div class="parameter-group">
-                                <label class="parameter-label">Session ID</label>
-                                <input type="text" class="parameter-input" id="rule-session-id"
-                                    placeholder="Enter session ID">
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Rule Name</label>
+                                        <input type="text" class="parameter-input" id="rule-name"
+                                            placeholder="Enter rule name">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Session ID</label>
+                                        <input type="text" class="parameter-input" id="rule-session-id"
+                                            placeholder="Enter session ID">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Trigger Type</label>
+                                        <select class="parameter-input" id="trigger-type">
+                                            <option value="contains">Contains</option>
+                                            <option value="equals">Equals</option>
+                                            <option value="startsWith">Starts With</option>
+                                            <option value="endsWith">Ends With</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Trigger Value</label>
+                                        <input type="text" class="parameter-input" id="trigger-value"
+                                            placeholder="Enter trigger text">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Response Type</label>
+                                        <select class="parameter-input" id="response-type">
+                                            <option value="text">Text</option>
+                                            <option value="image">Image</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Response Content</label>
+                                        <textarea class="parameter-input" id="response-content"
+                                            placeholder="Enter response content"></textarea>
+                                    </div>
+                                </div>
+
+                                <button class="action-button" onclick="runApiRequest('create-auto-reply')">
+                                    <i class="bi bi-plus-circle me-2"></i>Create Rule
+                                </button>
                             </div>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Trigger Type</label>
-                                <select class="parameter-input" id="trigger-type">
-                                    <option value="contains">Contains</option>
-                                    <option value="equals">Equals</option>
-                                    <option value="startsWith">Starts With</option>
-                                    <option value="endsWith">Ends With</option>
-                                </select>
-                            </div>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Trigger Value</label>
-                                <input type="text" class="parameter-input" id="trigger-value"
-                                    placeholder="Enter trigger text">
-                            </div>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Response Type</label>
-                                <select class="parameter-input" id="response-type">
-                                    <option value="text">Text</option>
-                                    <option value="image">Image</option>
-                                </select>
-                            </div>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Response Content</label>
-                                <textarea class="parameter-input" id="response-content" rows="3"
-                                    placeholder="Enter response content"></textarea>
-                            </div>
-
-                            <button class="action-button" onclick="runApiRequest('create-auto-reply')">
-                                Create Rule
-                            </button>
                         </div>
 
-                        <div class="parameter-section">
-                            <h3>Toggle Auto-Reply Rule</h3>
-                            <p>Toggle the active state of an auto-reply rule.</p>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Rule ID</label>
-                                <input type="text" class="parameter-input" id="toggle-rule-id"
-                                    placeholder="Enter rule ID">
+                        <!-- Toggle Auto-Reply Rule -->
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon toggle-icon">
+                                    <i class="bi bi-toggle-on"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Toggle Auto-Reply Rule</h3>
+                                    <span class="api-method method-post">POST</span>
+                                    <span class="api-endpoint">/api/auto-reply-rules/{id}/toggle</span>
+                                </div>
                             </div>
+                            <div class="api-card-body">
+                                <p>Toggle the active state of an auto-reply rule.</p>
 
-                            <button class="action-button" onclick="runApiRequest('toggle-auto-reply')">
-                                Toggle Rule
-                            </button>
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Rule ID</label>
+                                        <input type="text" class="parameter-input" id="toggle-rule-id"
+                                            placeholder="Enter rule ID">
+                                    </div>
+                                </div>
+
+                                <button class="action-button" onclick="runApiRequest('toggle-auto-reply')">
+                                    <i class="bi bi-toggle-on me-2"></i>Toggle Rule
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="parameter-section">
-                            <h3>Delete Auto-Reply Rule</h3>
-                            <p>Delete an auto-reply rule.</p>
-
-                            <div class="parameter-group">
-                                <label class="parameter-label">Rule ID</label>
-                                <input type="text" class="parameter-input" id="delete-rule-id"
-                                    placeholder="Enter rule ID">
+                        <!-- Delete Auto-Reply Rule -->
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon delete-icon">
+                                    <i class="bi bi-trash"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Delete Auto-Reply Rule</h3>
+                                    <span class="api-method method-delete">DELETE</span>
+                                    <span class="api-endpoint">/api/auto-reply-rules/{id}</span>
+                                </div>
                             </div>
+                            <div class="api-card-body">
+                                <p>Delete an auto-reply rule.</p>
 
-                            <button class="action-button" onclick="runApiRequest('delete-auto-reply')">
-                                Delete Rule
-                            </button>
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Rule ID</label>
+                                        <input type="text" class="parameter-input" id="delete-rule-id"
+                                            placeholder="Enter rule ID">
+                                    </div>
+                                </div>
+
+                                <button class="action-button delete-button"
+                                    onclick="runApiRequest('delete-auto-reply')">
+                                    <i class="bi bi-trash me-2"></i>Delete Rule
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -505,6 +660,23 @@ https://wapiconnect.koyeb.app/api/check-sessions \
         const user = getCurrentUser();
         document.getElementById('user-name').textContent = user.name;
 
+        // Update user avatar with first initial
+        function updateUserAvatar() {
+            const userName = document.getElementById('user-name').textContent;
+            const userAvatar = document.querySelector('.user-avatar');
+
+            if (userName && userName.length > 0) {
+                userAvatar.innerHTML = `<span>${userName.charAt(0).toUpperCase()}</span>`;
+            } else {
+                userAvatar.innerHTML = `<i class="bi bi-person-fill"></i>`;
+            }
+        }
+
+        // Call after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            updateUserAvatar();
+        });
+
         // Socket.io connection
         const socket = io();
 
@@ -512,11 +684,36 @@ https://wapiconnect.koyeb.app/api/check-sessions \
         let currentSessionId = null;
         const createSessionModal = new bootstrap.Modal(document.getElementById('create-session-modal'));
 
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            const sidebar = document.querySelector('.api-sidebar');
-            sidebar.classList.toggle('mobile-expanded');
-        }
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navbarNav = document.getElementById('navbarNav');
+            const body = document.body;
+
+            function toggleMobileMenu() {
+                navbarNav.classList.toggle('show');
+                body.classList.toggle('menu-open');
+            }
+
+            mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+
+            // Close menu when clicking on a nav link
+            document.querySelectorAll('.navbar-tab, .dropdown-item').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 992) {
+                        toggleMobileMenu();
+                    }
+                });
+            });
+
+            // Close menu on window resize if it's larger than mobile
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 992) {
+                    navbarNav.classList.remove('show');
+                    body.classList.remove('menu-open');
+                }
+            });
+        });
 
         // Tab navigation functionality
         document.addEventListener('DOMContentLoaded', function () {
@@ -1331,6 +1528,16 @@ https://wapiconnect.koyeb.app/api/auto-reply-rules \\
                 .replace(/\b(function|const|let|var|return|if|else|for|while)\b/g, '<span class="keyword">$1</span>')
                 .replace(/\b(GET|POST|PUT|DELETE)\b/g, '<span class="method">$1</span>');
         }
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.querySelector('.api-sidebar');
+            const sidebarHeader = document.querySelector('.sidebar-header');
+
+            if (sidebar && sidebarHeader) {
+                sidebarHeader.addEventListener('click', function () {
+                    sidebar.classList.toggle('expanded');
+                });
+            }
+        }); 
     </script>
 </body>
 

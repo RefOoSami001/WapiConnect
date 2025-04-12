@@ -418,4 +418,38 @@ async function checkExistingSessions() {
 }
 
 // Call the function when the page loads
-document.addEventListener('DOMContentLoaded', checkExistingSessions); 
+document.addEventListener('DOMContentLoaded', checkExistingSessions);
+
+// Mobile sidebar toggle functionality
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.api-sidebar');
+    sidebar.classList.toggle('expanded');
+}
+
+// Add click event to sidebar header for mobile
+document.querySelector('.sidebar-header').addEventListener('click', function () {
+    if (window.innerWidth <= 768) {
+        toggleMobileSidebar();
+    }
+});
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function (event) {
+    const sidebar = document.querySelector('.api-sidebar');
+    const sidebarHeader = document.querySelector('.sidebar-header');
+
+    if (window.innerWidth <= 768 &&
+        sidebar.classList.contains('expanded') &&
+        !sidebar.contains(event.target) &&
+        !sidebarHeader.contains(event.target)) {
+        sidebar.classList.remove('expanded');
+    }
+});
+
+// Handle window resize
+window.addEventListener('resize', function () {
+    const sidebar = document.querySelector('.api-sidebar');
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('expanded');
+    }
+}); 

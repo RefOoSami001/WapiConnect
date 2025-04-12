@@ -40,7 +40,7 @@ body {
     color: var(--text-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding-top: var(--navbar-height);
-    overflow: auto;
+    overflow: hidden;
 }
 
 .navbar {
@@ -71,15 +71,26 @@ body {
     color: var(--primary-color);
 }
 
-.navbar-brand i {
-    font-size: 1.6rem;
-    margin-right: 0.5rem;
-    color: var(--primary-color);
+.brand-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    box-shadow: 0 3px 8px rgba(37, 211, 102, 0.2);
     transition: var(--transition);
 }
 
-.navbar-brand:hover i {
-    transform: scale(1.1);
+.brand-logo i {
+    font-size: 1.4rem;
+    color: white;
+}
+
+.navbar-brand:hover .brand-logo {
+    transform: scale(1.05) rotate(-5deg);
 }
 
 .navbar-nav {
@@ -2004,67 +2015,165 @@ body {
     display: grid;
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr) minmax(0, 1fr);
     overflow: hidden;
+    position: relative;
+    height: calc(100vh - var(--navbar-height));
 }
 
 /* Left sidebar */
 .api-sidebar {
-    background-color: var(--bg-white);
-    border-right: 1px solid var(--border-light);
-    overflow-y: hidden;
+    background-color: white;
+    overflow-y: auto;
     padding: 0;
     height: 100%;
-    box-shadow: var(--card-shadow);
     z-index: 10;
+    position: sticky;
+    top: (var(--navbar-height));
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
 }
 
 .sidebar-header {
-    padding: 13px;
-    border-bottom: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 18px 20px;
     font-weight: 600;
     font-size: 16px;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 15px;
+    color: var(--text-color);
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header i {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 3px 8px rgba(37, 211, 102, 0.2);
 }
 
 .sidebar-tabs {
     display: flex;
     flex-direction: column;
+    padding: 15px 0;
 }
 
 .sidebar-tab {
-    padding: 10px 14px;
+    padding: 12px 16px;
     cursor: pointer;
     border: none;
     text-align: left;
     background: transparent;
-    color: #333;
+    color: var(--text-color);
     font-size: 14px;
-    border-bottom: 1px solid var(--border-light);
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 15px;
+    position: relative;
+    margin: 5px 10px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.sidebar-tab i {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+    color: var(--text-muted);
 }
 
 .sidebar-tab:hover {
-    background-color: rgba(0, 195, 165, 0.05);
+    background-color: #f8f9fa;
+    transform: translateX(3px);
+}
+
+.sidebar-tab:hover i {
+    transform: scale(1.1);
 }
 
 .sidebar-tab.active {
-    background-color: rgba(0, 195, 165, 0.08);
-    border-left: 3px solid var(--highlight-color);
-    color: var(--highlight-color);
+    background-color: rgba(37, 211, 102, 0.08);
+    color: var(--primary-color);
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(37, 211, 102, 0.15);
+}
+
+.sidebar-tab.active i {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    box-shadow: 0 3px 8px rgba(37, 211, 102, 0.2);
+}
+
+.sidebar-tab[data-target="#auth-section"] i {
+    color: var(--primary-dark);
+}
+
+.sidebar-tab[data-target="#sessions-section"] i {
+    color: #0984e3;
+}
+
+.sidebar-tab[data-target="#messaging-section"] i {
+    color: #6c5ce7;
+}
+
+.sidebar-tab[data-target="#contacts-section"] i {
+    color: #00b894;
+}
+
+.sidebar-tab[data-target="#auto-reply-section"] i {
+    color: #e17055;
+}
+
+.sidebar-tab[data-target="#auth-section"].active i {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    box-shadow: 0 3px 8px rgba(37, 211, 102, 0.2);
+    color: #fff;
+}
+
+.sidebar-tab[data-target="#sessions-section"].active i {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    box-shadow: 0 3px 8px rgba(9, 132, 227, 0.2);
+    color: #fff;
+}
+
+.sidebar-tab[data-target="#messaging-section"].active i {
+    background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+    box-shadow: 0 3px 8px rgba(108, 92, 231, 0.2);
+    color: #fff;
+}
+
+.sidebar-tab[data-target="#contacts-section"].active i {
+    background: linear-gradient(135deg, #55efc4, #00b894);
+    box-shadow: 0 3px 8px rgba(0, 184, 148, 0.2);
+    color: #fff;
+}
+
+.sidebar-tab[data-target="#auto-reply-section"].active i {
+    background: linear-gradient(135deg, #fab1a0, #e17055);
+    box-shadow: 0 3px 8px rgba(225, 112, 85, 0.2);
+    color: #fff;
 }
 
 /* Middle section */
 .api-content {
-    background-color: var(--bg-white);
-    border-right: 1px solid var(--border-light);
     overflow-y: auto;
     padding: 0;
-    box-shadow: var(--card-shadow);
     z-index: 7;
+    height: 90%;
+    width: calc(100% - 520px);
+    /* Adjust width to account for fixed api-response */
 }
 
 .parameter-section {
@@ -2163,11 +2272,13 @@ body {
 .api-response {
     background-color: var(--bg-dark);
     color: var(--text-primary);
-    overflow-y: hidden;
-    height: 85%;
+    overflow-y: auto;
+    height: 100%;
     display: flex;
     flex-direction: column;
     z-index: 5;
+    position: sticky;
+    top: var(--navbar-height);
 }
 
 .code-section {
@@ -2244,7 +2355,7 @@ body {
     transition: opacity 0.2s;
     pointer-events: none;
     white-space: nowrap;
-    z-index: 1000;
+    z-index: 2000;
 }
 
 .copy-button:hover::after {
@@ -2679,22 +2790,74 @@ textarea:focus {
 @media (max-width: 992px) {
     .api-container {
         grid-template-columns: var(--sidebar-width) 1fr;
-        grid-template-rows: 1fr 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
     }
 
     .api-sidebar {
-        grid-row: span 2;
+        grid-row: 1;
+        position: relative;
+        top: 0;
+        height: auto;
+        max-height: 300px;
+    }
+
+    .api-content {
+        grid-column: 2;
+        grid-row: 1;
     }
 
     .api-response {
-        grid-column: 2;
+        grid-column: 1 / span 2;
         grid-row: 2;
+        position: relative;
+        top: 0;
+        height: 600px;
     }
 }
 
 @media (max-width: 768px) {
     :root {
         --sidebar-width: 180px;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+    .navbar .nav-link {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    #create-session-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .dashboard-title {
+        font-size: 1.3rem;
+    }
+
+    .stats-number {
+        font-size: 1.3rem;
+    }
+
+    .session-card {
+        margin-bottom: 1rem;
+    }
+
+    .bulk-messaging-container {
+        padding: 1rem;
+    }
+
+    .bulk-messaging-title {
+        font-size: 1.1rem;
+    }
+
+    .session-selection,
+    .message-form {
+        padding: 1rem;
     }
 
     .sidebar-tab {
@@ -2706,29 +2869,32 @@ textarea:focus {
 @media (max-width: 576px) {
     .api-container {
         grid-template-columns: 1fr;
-        grid-template-rows: auto auto 1fr;
+        grid-template-rows: auto auto auto;
+        height: auto;
     }
 
     .api-sidebar {
         grid-row: 1;
+        grid-column: 1;
+        position: relative;
+        top: 0;
         height: auto;
-        position: sticky;
-        top: 56px;
-        max-height: 40vh;
+        max-height: 200px;
         overflow-y: auto;
     }
 
     .api-content {
         grid-row: 2;
-        max-height: 60vh;
-        overflow-y: auto;
+        grid-column: 1;
+        height: auto;
     }
 
     .api-response {
-        grid-column: 1;
         grid-row: 3;
-        height: auto;
-        min-height: 40vh;
+        grid-column: 1;
+        position: relative;
+        top: 0;
+        height: 450px;
     }
 
     .sidebar-tabs {
@@ -2742,6 +2908,8 @@ textarea:focus {
         flex: 0 0 auto;
         border-bottom: none;
         border-right: 1px solid var(--border-light);
+        font-size: 12px;
+        padding: 8px 10px;
     }
 
     .sidebar-tab.active {
@@ -2750,103 +2918,1952 @@ textarea:focus {
     }
 
     .parameter-group {
-        margin-bottom: 20px;
-    }
-
-    .mobile-menu-toggle {
-        display: block;
-    }
-
-    .api-sidebar .sidebar-header:after {
-        content: "\F479";
-        font-family: bootstrap-icons;
+        margin-bottom: 15px;
     }
 
     .parameter-section {
-        padding: 15px;
+        padding: 12px;
     }
 
     .parameter-section h3 {
-        font-size: 16px;
+        font-size: 15px;
+    }
+
+    .parameter-label {
+        font-size: 13px;
+    }
+
+    .parameter-input {
+        padding: 8px 10px;
+        font-size: 13px;
     }
 
     .action-button {
         width: 100%;
         justify-content: center;
+        padding: 8px 12px;
+        font-size: 13px;
     }
 
-    .copy-button::after {
-        display: none;
+    .navbar {
+        padding: 0.5rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .navbar .nav-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+        margin: 0 0.15rem;
+    }
+
+    #create-session-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .navbar .dropdown-menu {
+        min-width: 160px;
+    }
+
+    .navbar .dropdown-item {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .dashboard-container {
+        padding: 0.8rem 0;
+    }
+
+    .dashboard-title {
+        font-size: 1.2rem;
+    }
+
+    .bulk-messaging-title {
+        font-size: 1rem;
+    }
+
+    .stats-card {
+        padding: 0.6rem;
+    }
+
+    .stats-number {
+        font-size: 1.2rem;
+    }
+
+    .session-selection,
+    .message-form {
+        padding: 0.8rem;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+    }
+
+    .form-control {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
     }
 
     .code-block {
-        font-size: 12px;
-        padding: 12px;
+        font-size: 11px;
+        padding: 10px;
     }
 
     .code-label {
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .status-code {
         font-size: 10px;
-        padding: 2px 6px;
+        padding: 2px 5px;
+    }
+}
+
+/* For medium screens - tablets in portrait mode */
+@media (min-width: 577px) and (max-width: 768px) {
+    .api-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        height: auto;
+    }
+
+    .api-sidebar {
+        grid-column: 1;
+        grid-row: 1;
+        position: relative;
+        top: 0;
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .api-content {
+        grid-column: 1;
+        grid-row: 2;
     }
 
     .api-response {
-        height: auto;
-        max-height: 40vh;
+        grid-column: 1;
+        grid-row: 3;
+        position: relative;
+        top: 0;
+        height: 450px;
     }
+}
 
-    .navbar-brand {
-        font-size: 18px;
-    }
-
-    .session-card {
-        margin-bottom: 10px;
+/* For large desktops - fixed position for api response */
+@media (min-width: 1200px) {
+    .api-container {
+        grid-template-columns: var(--sidebar-width) minmax(0, 1fr) 0px;
+        position: relative;
     }
 
     .api-response {
-        height: auto;
-        max-height: 50vh;
-        min-height: 300px;
-    }
-
-    .code-block-container {
-        height: auto;
-        min-height: 120px;
-    }
-
-    .code-block {
-        min-height: 120px;
+        position: fixed;
+        margin-top: 20px;
+        top: var(--navbar-height);
+        right: 20px;
+        width: 500px;
+        height: calc(90vh - var(--navbar-height));
+        overflow-y: auto;
+        z-index: 20;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border-radius: var(--border-radius);
     }
 }
 
 /* Make textareas fixed height and not resizable */
-textarea.parameter-input {
-    min-height: 100px !important;
-    height: auto !important;
-    resize: none;
+textarea,
+textarea.parameter-input,
+textarea.form-control {
+    height: 80px !important;
+    min-height: 8% !important;
+    max-height: 80px !important;
+    resize: none !important;
+    overflow-y: auto;
 }
 
-/* Increase z-index for copy button tooltip */
-.copy-btn:hover::after {
-    z-index: 1000;
+/* API Card Styling */
+.api-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    margin: 10px;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Make action buttons match the create session button */
-.action-btn {
-    background: linear-gradient(90deg, #4568dc, #b06ab3);
+.api-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.api-card-header {
+    display: flex;
+    padding: 18px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.api-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-size: 1.2rem;
+    box-shadow: 0 3px 8px rgba(37, 211, 102, 0.2);
+    flex-shrink: 0;
 }
 
-.action-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.api-card-icon.delete-icon {
+    background: linear-gradient(135deg, #ff7675, #d63031);
+    box-shadow: 0 3px 8px rgba(214, 48, 49, 0.2);
+}
+
+.api-card-icon.message-icon {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    box-shadow: 0 3px 8px rgba(9, 132, 227, 0.2);
+}
+
+.api-card-icon.contacts-icon {
+    background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+    box-shadow: 0 3px 8px rgba(108, 92, 231, 0.2);
+}
+
+.api-card-icon.group-icon {
+    background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+    box-shadow: 0 3px 8px rgba(253, 203, 110, 0.2);
+    color: #2d3436;
+}
+
+.api-card-icon.rule-icon {
+    background: linear-gradient(135deg, #55efc4, #00b894);
+    box-shadow: 0 3px 8px rgba(0, 184, 148, 0.2);
+}
+
+.api-card-icon.toggle-icon {
+    background: linear-gradient(135deg, #fab1a0, #e17055);
+    box-shadow: 0 3px 8px rgba(225, 112, 85, 0.2);
+}
+
+.api-card-title {
+    flex-grow: 1;
+}
+
+.api-card-title h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+}
+
+.api-card-title p {
+    margin: 8px 0 0 0;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.api-method {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+    color: white;
+}
+
+.method-get {
+    background-color: #61affe;
+}
+
+.method-post {
+    background-color: #49cc90;
+}
+
+.method-delete {
+    background-color: #f93e3e;
+}
+
+.api-endpoint {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-left: 5px;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-muted);
+    font-family: 'Courier New', monospace;
+}
+
+.api-card-body {
+    padding: 20px;
+}
+
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-row:last-child {
+    margin-bottom: 20px;
+}
+
+.api-card .action-button {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    height: 42px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.api-card .delete-button {
+    background: linear-gradient(135deg, #ff7675, #d63031);
+}
+
+.api-card .delete-button:hover {
+    background: linear-gradient(135deg, #d63031, #ff7675);
+}
+
+/* Mobile responsiveness for API cards */
+@media (max-width: 768px) {
+    .api-card-header {
+        padding: 15px;
+    }
+
+    .api-card-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+        margin-right: 10px;
+    }
+
+    .api-card-title h3 {
+        font-size: 16px;
+    }
+
+    .api-card-body {
+        padding: 15px;
+    }
+
+    .api-method,
+    .api-endpoint {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 6px;
+        margin-top: 5px;
+    }
+
+    .api-card-title p {
+        font-size: 13px;
+    }
+}
+
+/* Enhanced Mobile Responsiveness */
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    .dashboard-container {
+        padding: 1rem 0;
+    }
+
+    .stats-card {
+        margin-bottom: 1rem;
+    }
+
+    .session-card {
+        margin-bottom: 1rem;
+    }
+
+    .tab-content {
+        padding: 1rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+    .navbar .nav-link {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    #create-session-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .dashboard-title {
+        font-size: 1.3rem;
+    }
+
+    .stats-number {
+        font-size: 1.3rem;
+    }
+
+    .bulk-messaging-container {
+        padding: 1rem;
+    }
+
+    .bulk-messaging-title {
+        font-size: 1.1rem;
+    }
+
+    .session-selection,
+    .message-form {
+        padding: 1rem;
+    }
+
+    .sidebar-tab {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .container {
+        max-width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+
+    .col,
+    .col-1,
+    .col-2,
+    .col-3,
+    .col-4,
+    .col-5,
+    .col-6,
+    .col-7,
+    .col-8,
+    .col-9,
+    .col-10,
+    .col-11,
+    .col-12,
+    .col-sm,
+    .col-md,
+    .col-lg,
+    .col-xl {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    :root {
+        --navbar-height: 60px;
+    }
+
+    body {
+        font-size: 0.9rem;
+    }
+
+    .api-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        height: auto;
+    }
+
+    .api-sidebar {
+        grid-row: 1;
+        grid-column: 1;
+        position: relative;
+        top: 0;
+        height: auto;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .api-content {
+        grid-row: 2;
+        grid-column: 1;
+        height: auto;
+    }
+
+    .api-response {
+        grid-row: 3;
+        grid-column: 1;
+        position: relative;
+        top: 0;
+        height: 450px;
+    }
+
+    .sidebar-tabs {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-x: auto;
+    }
+
+    .sidebar-tab {
+        flex: 0 0 auto;
+        border-bottom: none;
+        border-right: 1px solid var(--border-light);
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+
+    .sidebar-tab.active {
+        border-left: none;
+        border-bottom: 3px solid var(--highlight-color);
+    }
+
+    .parameter-group {
+        margin-bottom: 15px;
+    }
+
+    .parameter-section {
+        padding: 12px;
+    }
+
+    .parameter-section h3 {
+        font-size: 15px;
+    }
+
+    .parameter-label {
+        font-size: 13px;
+    }
+
+    .parameter-input {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .action-button {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .navbar {
+        padding: 0.5rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .brand-logo {
+        width: 32px;
+        height: 32px;
+        margin-right: 0.5rem;
+    }
+
+    .brand-logo i {
+        font-size: 1.2rem;
+    }
+
+    .navbar .nav-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+        margin: 0 0.15rem;
+    }
+
+    #create-session-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .navbar .dropdown-menu {
+        min-width: 160px;
+    }
+
+    .navbar .dropdown-item {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .dashboard-container {
+        padding: 0.8rem 0;
+    }
+
+    .dashboard-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dashboard-title {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .bulk-messaging-title {
+        font-size: 1rem;
+    }
+
+    .bulk-messaging-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .bulk-messaging-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+        margin-right: 0.75rem;
+    }
+
+    .stats-card {
+        padding: 0.6rem;
+    }
+
+    .stats-number {
+        font-size: 1.2rem;
+    }
+
+    .session-selection,
+    .message-form {
+        padding: 0.8rem;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+    }
+
+    .form-control {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .code-block {
+        font-size: 11px;
+        padding: 10px;
+    }
+
+    .code-label {
+        font-size: 10px;
+    }
+
+    .status-code {
+        font-size: 10px;
+        padding: 2px 5px;
+    }
+
+    .session-card {
+        margin-bottom: 1rem;
+    }
+
+    .session-header {
+        padding: 0.75rem;
+    }
+
+    .session-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+
+    .session-title {
+        font-size: 0.9rem;
+    }
+
+    .session-body {
+        padding: 0.75rem;
+    }
+
+    .session-info-item {
+        font-size: 0.8rem;
+    }
+
+    .modal-header {
+        padding: 1rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-title {
+        font-size: 1.1rem;
+    }
+
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+    }
+
+    .empty-state-title {
+        font-size: 1.1rem;
+    }
+
+    .api-method {
+        font-size: 10px;
+        padding: 2px 5px;
+    }
+
+    .api-url {
+        font-size: 11px;
+    }
+
+    .image-preview img {
+        max-height: 150px;
+    }
+
+    /* Show collapsed navbar earlier */
+    .navbar-expand-lg .navbar-toggler {
+        display: block;
+    }
+
+    .navbar-expand-lg .navbar-collapse {
+        display: none !important;
+    }
+
+    .navbar-expand-lg .navbar-collapse.show {
+        display: block !important;
+    }
+
+    .navbar-expand-lg .navbar-nav {
+        flex-direction: column;
+    }
+}
+
+/* Add specific styles for very small devices */
+@media (max-width: 375px) {
+    :root {
+        --navbar-height: 55px;
+    }
+
+    body {
+        font-size: 0.85rem;
+    }
+
+    .navbar-brand {
+        font-size: 1rem;
+    }
+
+    .brand-logo {
+        width: 28px;
+        height: 28px;
+    }
+
+    .brand-logo i {
+        font-size: 1rem;
+    }
+
+    .api-sidebar {
+        max-height: 180px;
+    }
+
+    .sidebar-tab {
+        font-size: 11px;
+        padding: 6px 8px;
+    }
+
+    .dashboard-title {
+        font-size: 1.1rem;
+    }
+
+    .stats-card {
+        padding: 0.5rem;
+    }
+
+    .stats-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+
+    .stats-number {
+        font-size: 1.1rem;
+    }
+
+    .stats-label {
+        font-size: 0.7rem;
+    }
+
+    .btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .session-radio-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+
+    .session-radio-title {
+        font-size: 0.85rem;
+    }
+
+    .session-radio-status {
+        font-size: 0.7rem;
+    }
+
+    .form-control {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.85rem;
+    }
+
+    .modal-header {
+        padding: 0.8rem;
+    }
+
+    .modal-body {
+        padding: 0.8rem;
+    }
+
+    .code-block {
+        font-size: 10px;
+        padding: 8px;
+    }
+}
+
+/* Adjust the columns on smaller screens */
+@media (max-width: 768px) {
+
+    .col-md-3,
+    .col-md-4,
+    .col-md-6,
+    .col-lg-3,
+    .col-lg-4,
+    .col-lg-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .col-md-3,
+    .col-md-4,
+    .col-md-6,
+    .col-lg-3,
+    .col-lg-4,
+    .col-lg-6,
+    .col-sm-6,
+    .col-sm-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Fix navigation on small screens */
+@media (max-width: 576px) {
+
+    .navbar-expand-lg>.container,
+    .navbar-expand-lg>.container-fluid {
+        padding-right: 0.5rem;
+        padding-left: 0.5rem;
+    }
+
+    .navbar-nav .dropdown-menu {
+        position: absolute;
+    }
+
+    .navbar .user-profile {
+        padding: 0.4rem 0.6rem;
+    }
+
+    .navbar .user-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+        margin-right: 0.5rem;
+    }
+
+    .navbar .user-name {
+        font-size: 0.85rem;
+    }
+
+    .navbar .user-role {
+        font-size: 0.7rem;
+    }
+
+    /* Make navbar fixed at the top */
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1030;
+    }
+
+    /* Improve touch targets for mobile */
+    button,
+    .btn,
+    .nav-link,
+    .navbar-toggler,
+    input[type="checkbox"],
+    input[type="radio"],
+    .form-check-label {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Fix scrolling issues on mobile */
+@media (max-width: 768px) {
+
+    html,
+    body {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
+    }
+
+    .mobile-scroll-container {
+        -webkit-overflow-scrolling: touch;
+        overflow-y: auto;
+    }
+}
+
+/* Improve form elements on mobile */
+@media (max-width: 576px) {
+
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+        /* Prevents zoom on focus in iOS */
+    }
+
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table td,
+    .table th {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Fix middle section width issues on mobile */
+@media (max-width: 768px) {
+
+    /* Ensure content stays within viewport */
+    .container,
+    .container-fluid,
+    .container-sm,
+    .container-md,
+    .container-lg,
+    .container-xl {
+        width: 100%;
+        max-width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        overflow-x: hidden;
+    }
+
+    /* Ensure all content elements respect container boundaries */
+    .card,
+    .api-docs-container,
+    .bulk-messaging-container,
+    .api-endpoint,
+    .session-card,
+    .empty-state,
+    .stats-card,
+    .tab-content,
+    .session-selection,
+    .message-form,
+    .api-card,
+    .modal-content {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Fix potential overflow issues */
+    .row {
+        margin-right: -10px;
+        margin-left: -10px;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    /* Fix padding issues that may cause overflow */
+    [class*="col-"] {
+        padding-right: 10px;
+        padding-left: 10px;
+        width: 100%;
+    }
+
+    /* Ensure all tables can scroll horizontally on mobile */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Ensure images don't overflow */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Fix for content overflow */
+    .dashboard-container,
+    .api-content,
+    .main-content {
+        overflow-x: hidden;
+        max-width: 100vw;
+
+        box-sizing: border-box;
+    }
+
+    /* Improve api container layout */
+    .api-container {
+        display: block;
+        width: 100%;
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    /* Make API sidebar more mobile-friendly */
+    .api-sidebar {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Adjust API content width */
+    .api-content {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Adjust API response width */
+    .api-response {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Handle code blocks properly */
+    .code-block,
+    pre,
+    code {
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Fix long text overflow */
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    .text-truncate,
+    .card-title,
+    .card-text,
+    .form-label {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        -ms-word-break: break-all;
+        word-break: break-word;
+    }
+}
+
+/* Additional fixes specifically for extra small screens */
+@media (max-width: 576px) {
+
+    /* Further reduce padding on containers */
+    .container,
+    .container-fluid,
+    .container-sm,
+    .container-md,
+    .container-lg,
+    .container-xl {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    /* Fix modal width */
+    .modal-dialog {
+        max-width: 100%;
+        margin: 0.5rem;
+    }
+
+    /* Reduce padding on content areas */
+    .card-body,
+    .session-body,
+    .api-card-body,
+    .modal-body,
+    .tab-content,
+    .message-form,
+    .session-selection {
+        padding: 0.75rem;
+    }
+
+    /* Adjust grid items for better mobile display */
+    .api-container {
+        padding: 0;
+    }
+
+    /* Ensure fixed elements don't cause overflow */
+    .navbar,
+    .navbar-fixed-top,
+    .navbar-fixed-bottom {
+        max-width: 100vw;
+    }
+
+    /* Fix horizontal scrolling in API docs section */
+    .api-docs-nav .nav-pills {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1rem;
+        max-width: 100%;
+        padding-bottom: 5px;
+    }
+
+    /* Force proper wrapping on API elements */
+    .api-endpoint-title,
+    .api-url,
+    .api-param,
+    .api-description {
+        max-width: 100%;
+        word-break: break-all;
+    }
+
+    /* Force proper width on API response */
+    .api-response-block,
+    .api-code-block {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+/* Fix sidebar collapse and middle section width issues */
+@media (max-width: 768px) {
+
+    /* Fix sidebar collapse issue */
+    .api-sidebar {
+        max-height: none;
+        height: auto;
+        transition: max-height 0.3s ease;
+        overflow: visible;
+    }
+
+    /* Make sidebar header clearly clickable */
+    .sidebar-header {
+        cursor: pointer;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Ensure arrow is visible and indicates expandability */
+    .sidebar-header:after {
+        content: "\25BC";
+        position: absolute;
+        right: 15px;
+        transition: transform 0.3s ease;
+        font-size: 12px;
+    }
+
+    /* Style for when sidebar is expanded */
+    .api-sidebar.expanded .sidebar-header:after {
+        transform: rotate(180deg);
+    }
+
+    /* Initially hide sidebar tabs but show when expanded */
+    .sidebar-tabs {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    /* Show sidebar tabs when expanded */
+    .api-sidebar.expanded .sidebar-tabs {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    /* Make sidebar tabs more touch-friendly */
+    .sidebar-tab {
+        padding: 12px 16px;
+        margin: 5px 10px;
+    }
+
+    /* Match widths of middle section and API response */
+    .api-content,
+    .api-response {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    /* Adjust container layout for better mobile viewing */
+    .api-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    /* Equal sizing for all API sections */
+    .api-content,
+    .api-response,
+    .api-sidebar {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+}
+
+/* Add JavaScript functionality via CSS */
+@media (max-width: 768px) {
+
+    /* Add toggle behavior using :target pseudo-class */
+    .api-sidebar:target .sidebar-tabs {
+        max-height: 500px;
+    }
+
+    .api-sidebar:target .sidebar-header:after {
+        transform: rotate(180deg);
+    }
+
+    /* Ensure pointer cursor on clickable elements */
+    .sidebar-header,
+    .sidebar-tab {
+        cursor: pointer;
+    }
+}
+
+/* Extra small device specific adjustments */
+@media (max-width: 576px) {
+
+    /* Further optimize space usage */
+    .api-content,
+    .api-response {
+        padding: 8px;
+    }
+
+    /* Increase touch target sizes */
+    .sidebar-tab,
+    .sidebar-header {
+        min-height: 48px;
+    }
+
+    /* Ensure code blocks have proper width */
+    .code-block-container,
+    .code-block {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Fix parameter inputs width */
+    .parameter-input {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+/* JavaScript-like functionality for sidebar toggle using CSS only */
+@media (max-width: 768px) {
+
+    /* Use checkbox hack for toggle functionality */
+    #sidebar-toggle {
+        display: none;
+    }
+
+    .sidebar-toggle-label {
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 5;
+    }
+
+    #sidebar-toggle:checked~.sidebar-tabs {
+        max-height: 500px;
+    }
+
+    #sidebar-toggle:checked~.sidebar-header:after {
+        transform: rotate(180deg);
+    }
+}
+
+/* Fix mobile layout issues based on screenshot */
+@media (max-width: 768px) {
+
+    /* Reset all containers to proper width */
+    .container,
+    .container-fluid,
+    .row,
+    .col,
+    [class*="col-"],
+    .api-container,
+    .api-content,
+    .api-response,
+    .api-sidebar {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+        box-sizing: border-box;
+    }
+
+    /* Fix right-shifted content */
+    .api-content {
+        margin: 0 auto;
+        left: 0;
+        right: 0;
+        padding: 10px;
+    }
+
+    /* Make consistent padding for all sections */
+    .api-response,
+    .parameter-section {
+        padding: 10px;
+    }
+
+    /* Fix API container layout */
+    .api-container {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    /* Reset sidebar positioning */
+    .api-sidebar {
+        position: relative;
+        top: auto;
+        left: auto;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 10px;
+    }
+
+    /* Fix sidebar expansion */
+    .sidebar-header {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sidebar-header::after {
+        content: "▼";
+        display: inline-block;
+        margin-left: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    /* Initial state - collapsed */
+    .sidebar-tabs {
+        display: none;
+        transition: all 0.3s ease;
+    }
+
+    /* When sidebar has active class, display tabs */
+    .api-sidebar.active .sidebar-tabs {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .api-sidebar.active .sidebar-header::after {
+        transform: rotate(180deg);
+    }
+
+    /* Override any conflicting styles */
+    .api-sidebar {
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .sidebar-tabs.expanded {
+        display: block !important;
+        max-height: none !important;
+    }
+
+    /* Consistent padding for internal sections */
+    .api-card,
+    .token-value,
+    .code-block,
+    .api-docs,
+    .parameter-section,
+    .form-group,
+    .parameter-group {
+        width: 100%;
+        max-width: 100%;
+        padding: 10px;
+        margin-left: 0;
+        margin-right: 0;
+        box-sizing: border-box;
+    }
+
+    /* Fix API response alignment */
+    .api-response {
+        width: 100%;
+        position: relative;
+        top: auto;
+        right: auto;
+        margin: 0;
+        border-radius: var(--border-radius);
+    }
+
+    /* Add proper padding only to content elements */
+    .parameter-input,
+    .form-control,
+    .code-block-container {
+        padding: 10px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Common container size */
+    .api-content,
+    .api-response {
+        min-height: 250px;
+    }
+}
+
+/* Add JavaScript-like functionality for sidebar toggle */
+@media (max-width: 768px) {
+
+    /* Make sure any pseudo-element content is visible */
+    .sidebar-header::after {
+        font-size: 14px;
+        margin-right: 15px;
+        color: var(--primary-color);
+    }
+
+    /* Ensure spacing inside sidebar */
+    .sidebar-tab {
+        margin-top: 2px;
+        margin-bottom: 2px;
+    }
+
+    /* Make tabs appear properly when expanded */
+    .api-sidebar.expanded .sidebar-tabs {
+        display: block;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    /* Override any max-height restrictions */
+    .sidebar-tabs {
+        max-height: none !important;
+    }
+
+    /* Fix any scrolling issues within sidebar */
+    .sidebar-tabs.expanded {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Make sure contents are properly aligned for small screens */
+@media (max-width: 576px) {
+
+    /* Fix element alignments */
+    .api-endpoint-title,
+    .api-url,
+    .token-value,
+    .parameter-label {
+        text-align: left;
+        width: 100%;
+    }
+
+    /* Fix button width */
+    .action-button,
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* No margin for content containers */
+    .api-sidebar,
+    .api-content,
+    .api-response {
+        border-radius: var(--border-radius);
+    }
+
+    /* Fix internal padding */
+    .parameter-section,
+    .api-card-body,
+    .api-endpoint {
+        padding: 10px;
+    }
+}
+
+/* Fix for sidebar expansion in mobile - CSS-only solution */
+@media (max-width: 768px) {
+
+    /* Make sidebar act as a collapsible section */
+    .api-sidebar {
+        position: relative;
+    }
+
+    /* Create CSS-only collapsible sidebar using checkbox hack */
+    .api-sidebar input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        z-index: -1;
+    }
+
+    .api-sidebar label {
+        cursor: pointer;
+    }
+
+    .sidebar-header {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Style the toggle indicator */
+    .sidebar-header::after {
+        content: "▼";
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        color: var(--primary-color);
+        transition: transform 0.3s ease;
+    }
+
+    /* Initial state - hide the tabs */
+    .sidebar-tabs {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+    }
+
+    /* When checkbox is checked, show tabs */
+    .api-sidebar input[type="checkbox"]:checked~.sidebar-tabs {
+        max-height: 1000px;
+    }
+
+    /* Rotate arrow when expanded */
+    .api-sidebar input[type="checkbox"]:checked~.sidebar-header::after {
+        transform: translateY(-50%) rotate(180deg);
+    }
+
+    /* Reset any conflicting styles */
+    .sidebar-tabs.expanded,
+    .api-sidebar.active .sidebar-tabs,
+    .api-sidebar.expanded .sidebar-tabs {
+        display: block;
+    }
+
+    /* Make sure each tab is visible when expanded */
+    .sidebar-tab {
+        display: block;
+        width: 100%;
+        padding: 12px 15px;
+        margin: 4px 0;
+        border-radius: var(--border-radius);
+    }
+
+    /* Ensure sidebar header is clickable */
+    .sidebar-header {
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+    }
+}
+
+/* Add this CSS hack at the end to ensure it overrides other styles */
+@media (max-width: 768px) {
+
+    /* Alternative approach using :target pseudoclass */
+    #mobile-sidebar:target .sidebar-tabs {
+        max-height: 1000px !important;
+        display: block !important;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    #mobile-sidebar:target .sidebar-header::after {
+        transform: translateY(-50%) rotate(180deg);
+    }
+
+    /* Make sure sidebar is properly styled */
+    .api-sidebar {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+    }
+
+    /* Prevent any hidden styles from being applied */
+    .sidebar-tabs {
+        transition: max-height 0.5s ease !important;
+    }
+}
+
+/* Mobile sidebar styles */
+@media (max-width: 768px) {
+    .api-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .api-sidebar {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 10px;
+        overflow: visible;
+    }
+
+    .sidebar-header {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: var(--border-radius);
+        margin-bottom: 0;
+        position: relative;
+    }
+
+    .sidebar-header::after {
+        content: "▼";
+        font-size: 12px;
+        color: var(--primary-color);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-tabs {
+        display: none;
+        flex-direction: column;
+        padding: 10px;
+        background-color: white;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: var(--card-shadow);
+    }
+
+    .api-sidebar.expanded .sidebar-tabs {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .api-sidebar.expanded .sidebar-header::after {
+        transform: rotate(180deg);
+    }
+
+    .sidebar-tab {
+        width: 100%;
+        padding: 12px 15px;
+        margin: 5px 0;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background-color: white;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+    }
+
+    .sidebar-tab i {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+
+    .sidebar-tab:hover {
+        background-color: #f8f9fa;
+        transform: translateX(3px);
+    }
+
+    .sidebar-tab.active {
+        background-color: rgba(37, 211, 102, 0.08);
+        color: var(--primary-color);
+        border-color: rgba(37, 211, 102, 0.2);
+    }
+
+    .sidebar-tab.active i {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+    }
+
+    /* Fix content layout */
+    .api-content {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .api-response {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 576px) {
+    .sidebar-tab {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .sidebar-tab i {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+
+    .sidebar-header {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+}
+
+/* Mobile Menu Styles */
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-menu-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.navbar-collapse {
+    transition: transform 0.3s ease;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 300px;
+        height: 100vh;
+        background-color: #fff;
+        z-index: 1050;
+        padding: 1.5rem;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .navbar-collapse.show {
+        transform: translateX(-300px);
+    }
+
+    .navbar-tabs {
+        flex-direction: column;
+        margin: 2rem 0;
+        gap: 0.75rem;
+    }
+
+    .navbar-tab {
+        padding: 1rem 1.25rem;
+        margin: 0;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s ease;
+        background-color: var(--gray-color);
+        color: var(--text-color);
+    }
+
+    .navbar-tab i {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    .navbar-tab span {
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .navbar-tab:hover {
+        background-color: var(--navbar-hover);
+        transform: translateX(-5px);
+    }
+
+    .navbar-tab.active {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+    }
+
+    .navbar-tab.active i {
+        color: white;
+    }
+
+    .navbar-nav {
+        margin-top: auto;
+        padding: 1rem 0;
+        border-top: 1px solid var(--navbar-border);
+    }
+
+    .user-profile {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s ease;
+        background-color: var(--gray-color);
+    }
+
+    .user-profile:hover {
+        background-color: var(--navbar-hover);
+        transform: translateX(-5px);
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 500;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: 1rem;
+    }
+
+    .dropdown-menu {
+        position: static !important;
+        transform: none !important;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        margin-top: 0.5rem;
+        background: transparent;
+    }
+
+    .dropdown-item {
+        padding: 0.75rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--text-color);
+        border-radius: 12px;
+        background-color: var(--gray-color);
+        margin-top: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-item i {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    .dropdown-item span {
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .dropdown-item:hover {
+        background-color: var(--navbar-hover);
+        transform: translateX(-5px);
+        color: var(--primary-color);
+    }
+
+    .dropdown-item:hover i {
+        color: var(--primary-color);
+    }
+
+    body.menu-open {
+        overflow: hidden;
+    }
 }

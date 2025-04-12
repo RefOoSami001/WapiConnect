@@ -44,12 +44,18 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Trust proxy - necessary when behind reverse proxies like Render.com, Heroku, Koyeb, etc.
-app.set('trust proxy', true);
+app.set('trust proxy', 1); // Trust first proxy
 
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
+    max: 100, // limit each IP to 100 requests per windowMs
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    keyGenerator: (req) => {
+        // Use the real IP address from the X-Forwarded-For header if available
+        return req.ip;
+    }
 });
 
 app.use(limiter);
@@ -238,181 +244,215 @@ async function createSession(sessionId, userId) {
             }
 
             for (const message of messages) {
-                console.log('Processing message:', {
-                    from: message.key.remoteJid,
-                    fromMe: message.key.fromMe,
-                    hasText: !!message.message?.conversation || !!message.message?.extendedTextMessage?.text,
-                    hasCaption: !!message.message?.imageMessage?.caption || !!message.message?.videoMessage?.caption || !!message.message?.documentMessage?.caption
-                });
+                try {
+                    console.log('Processing message:', {
+                        from: message.key.remoteJid,
+                        fromMe: message.key.fromMe,
+                        hasText: !!message.message?.conversation || !!message.message?.extendedTextMessage?.text,
+                        hasCaption: !!message.message?.imageMessage?.caption || !!message.message?.videoMessage?.caption || !!message.message?.documentMessage?.caption
+                    });
 
-                // Skip messages from groups or status updates
-                if (message.key.remoteJid.endsWith('@g.us') || message.key.remoteJid.endsWith('@broadcast')) {
-                    console.log('Skipping group/broadcast message');
-                    continue;
-                }
-
-                // Skip messages from the bot itself
-                if (message.key.fromMe) {
-                    console.log('Skipping message from bot');
-                    continue;
-                }
-
-                // Get the session from memory
-                const session = sessions.get(sessionId);
-                if (!session) {
-                    console.error(`Session ${sessionId} not found in memory. Available sessions:`, Array.from(sessions.keys()));
-                    continue;
-                }
-
-                console.log('Found session:', {
-                    sessionId,
-                    userId: session.userId,
-                    hasSock: !!session.sock
-                });
-
-                // Find active auto-reply rules for this session
-                const rules = await AutoReplyRule.find({
-                    sessionId,
-                    userId: session.userId,
-                    isActive: true
-                });
-
-                console.log(`Found ${rules.length} active auto-reply rules for session ${sessionId}:`, rules.map(r => ({
-                    name: r.name,
-                    triggerType: r.triggerType,
-                    triggerValue: r.triggerValue,
-                    isActive: r.isActive
-                })));
-
-                if (rules.length === 0) {
-                    console.log('No active rules found, skipping');
-                    continue;
-                }
-
-                // Get the message text
-                let messageText = '';
-                if (message.message?.conversation) {
-                    messageText = message.message.conversation;
-                } else if (message.message?.extendedTextMessage?.text) {
-                    messageText = message.message.extendedTextMessage.text;
-                } else if (message.message?.imageMessage?.caption) {
-                    messageText = message.message.imageMessage.caption;
-                } else if (message.message?.videoMessage?.caption) {
-                    messageText = message.message.videoMessage.caption;
-                } else if (message.message?.documentMessage?.caption) {
-                    messageText = message.message.documentMessage.caption;
-                }
-
-                if (!messageText) {
-                    console.log('No text content found in message');
-                    continue;
-                }
-
-                console.log(`Processing message text: "${messageText}"`);
-
-                // Check each rule
-                for (const rule of rules) {
-                    let shouldReply = false;
-                    console.log(`Checking rule: ${rule.name} (${rule.triggerType}: ${rule.triggerValue})`);
-
-                    // Check trigger conditions
-                    switch (rule.triggerType) {
-                        case 'keyword':
-                            shouldReply = messageText.toLowerCase().includes(rule.triggerValue.toLowerCase());
-                            break;
-                        case 'regex':
-                            try {
-                                const regex = new RegExp(rule.triggerValue, 'i');
-                                shouldReply = regex.test(messageText);
-                            } catch (error) {
-                                console.error('Invalid regex in auto-reply rule:', error);
-                            }
-                            break;
-                        case 'exact':
-                            shouldReply = messageText.toLowerCase() === rule.triggerValue.toLowerCase();
-                            break;
-                        case 'contains':
-                            shouldReply = messageText.toLowerCase().includes(rule.triggerValue.toLowerCase());
-                            break;
-                    }
-
-                    console.log(`Trigger check result for rule ${rule.name}: ${shouldReply}`);
-
-                    if (!shouldReply) {
-                        console.log('Rule conditions not met, skipping');
+                    // Skip messages from groups or status updates
+                    if (message.key.remoteJid.endsWith('@g.us') || message.key.remoteJid.endsWith('@broadcast')) {
+                        console.log('Skipping group/broadcast message');
                         continue;
                     }
 
-                    // Check time restrictions
-                    if (rule.conditions.timeRestricted) {
-                        const now = new Date();
-                        const currentHour = now.getHours();
-                        const currentMinute = now.getMinutes();
-                        const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-                        const currentDay = now.getDay();
-
-                        console.log(`Time check - Current: ${currentTime}, Start: ${rule.conditions.startTime}, End: ${rule.conditions.endTime}, Day: ${currentDay}`);
-
-                        // Check if current day is in allowed days
-                        if (rule.conditions.daysOfWeek && rule.conditions.daysOfWeek.length > 0) {
-                            if (!rule.conditions.daysOfWeek.includes(currentDay)) {
-                                console.log('Day not in allowed days');
-                                continue;
-                            }
-                        }
-
-                        // Check if current time is within allowed time range
-                        if (rule.conditions.startTime && rule.conditions.endTime) {
-                            if (currentTime < rule.conditions.startTime || currentTime > rule.conditions.endTime) {
-                                console.log('Time not in allowed range');
-                                continue;
-                            }
-                        }
+                    // Skip messages from the bot itself
+                    if (message.key.fromMe) {
+                        console.log('Skipping message from bot');
+                        continue;
                     }
 
-                    // Check contact restrictions
-                    if (rule.conditions.contactRestricted) {
-                        const senderJid = message.key.remoteJid;
-                        const senderNumber = senderJid.split('@')[0];
+                    // Get the session from memory
+                    const session = sessions.get(sessionId);
+                    if (!session) {
+                        console.error(`Session ${sessionId} not found in memory. Available sessions:`, Array.from(sessions.keys()));
+                        continue;
+                    }
 
-                        console.log(`Contact check - Sender: ${senderNumber}`);
+                    console.log('Found session:', {
+                        sessionId,
+                        userId: session.userId,
+                        hasSock: !!session.sock
+                    });
 
-                        // Check if sender is in allowed contacts
-                        if (rule.conditions.allowedContacts && rule.conditions.allowedContacts.length > 0) {
-                            if (!rule.conditions.allowedContacts.includes(senderNumber)) {
-                                console.log('Sender not in allowed contacts');
-                                continue;
-                            }
+                    // Find active auto-reply rules for this session
+                    const rules = await AutoReplyRule.find({
+                        sessionId,
+                        userId: session.userId,
+                        isActive: true
+                    });
+
+                    console.log(`Found ${rules.length} active auto-reply rules for session ${sessionId}:`, rules.map(r => ({
+                        name: r.name,
+                        triggerType: r.triggerType,
+                        triggerValue: r.triggerValue,
+                        isActive: r.isActive
+                    })));
+
+                    if (rules.length === 0) {
+                        console.log('No active rules found, skipping');
+                        continue;
+                    }
+
+                    // Get the message text
+                    let messageText = '';
+                    if (message.message?.conversation) {
+                        messageText = message.message.conversation;
+                    } else if (message.message?.extendedTextMessage?.text) {
+                        messageText = message.message.extendedTextMessage.text;
+                    } else if (message.message?.imageMessage?.caption) {
+                        messageText = message.message.imageMessage.caption;
+                    } else if (message.message?.videoMessage?.caption) {
+                        messageText = message.message.videoMessage.caption;
+                    } else if (message.message?.documentMessage?.caption) {
+                        messageText = message.message.documentMessage.caption;
+                    }
+
+                    if (!messageText) {
+                        console.log('No text content found in message');
+                        continue;
+                    }
+
+                    console.log(`Processing message text: "${messageText}"`);
+
+                    // Check each rule
+                    for (const rule of rules) {
+                        let shouldReply = false;
+                        console.log(`Checking rule: ${rule.name} (${rule.triggerType}: ${rule.triggerValue})`);
+
+                        // Check trigger conditions
+                        switch (rule.triggerType) {
+                            case 'keyword':
+                                shouldReply = messageText.toLowerCase().includes(rule.triggerValue.toLowerCase());
+                                break;
+                            case 'regex':
+                                try {
+                                    const regex = new RegExp(rule.triggerValue, 'i');
+                                    shouldReply = regex.test(messageText);
+                                } catch (error) {
+                                    console.error('Invalid regex in auto-reply rule:', error);
+                                }
+                                break;
+                            case 'exact':
+                                shouldReply = messageText.toLowerCase() === rule.triggerValue.toLowerCase();
+                                break;
+                            case 'contains':
+                                shouldReply = messageText.toLowerCase().includes(rule.triggerValue.toLowerCase());
+                                break;
                         }
 
-                        // Check if sender is in excluded contacts
-                        if (rule.conditions.excludedContacts && rule.conditions.excludedContacts.includes(senderNumber)) {
-                            console.log('Sender in excluded contacts');
+                        console.log(`Trigger check result for rule ${rule.name}: ${shouldReply}`);
+
+                        if (!shouldReply) {
+                            console.log('Rule conditions not met, skipping');
                             continue;
                         }
-                    }
 
-                    // If we get here, we should send a reply
-                    try {
-                        const jid = message.key.remoteJid;
-                        console.log(`Sending auto-reply for rule: ${rule.name} to ${jid}`);
+                        // Check time restrictions
+                        if (rule.conditions.timeRestricted) {
+                            const now = new Date();
+                            const currentHour = now.getHours();
+                            const currentMinute = now.getMinutes();
+                            const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+                            const currentDay = now.getDay();
 
-                        // Send the appropriate response
-                        if (rule.responseType === 'text') {
-                            await sock.sendMessage(jid, { text: rule.responseContent });
-                        } else if (rule.responseType === 'image' && rule.imageUrl) {
-                            await sock.sendMessage(jid, {
-                                image: { url: rule.imageUrl },
-                                caption: rule.responseContent
-                            });
-                        } else if (rule.responseType === 'template') {
-                            // Handle template messages if needed
-                            await sock.sendMessage(jid, { text: rule.responseContent });
+                            console.log(`Time check - Current: ${currentTime}, Start: ${rule.conditions.startTime}, End: ${rule.conditions.endTime}, Day: ${currentDay}`);
+
+                            // Check if current day is in allowed days
+                            if (rule.conditions.daysOfWeek && rule.conditions.daysOfWeek.length > 0) {
+                                if (!rule.conditions.daysOfWeek.includes(currentDay)) {
+                                    console.log('Day not in allowed days');
+                                    continue;
+                                }
+                            }
+
+                            // Check if current time is within allowed time range
+                            if (rule.conditions.startTime && rule.conditions.endTime) {
+                                if (currentTime < rule.conditions.startTime || currentTime > rule.conditions.endTime) {
+                                    console.log('Time not in allowed range');
+                                    continue;
+                                }
+                            }
                         }
 
-                        console.log(`Auto-reply sent successfully for rule: ${rule.name}`);
-                    } catch (error) {
-                        console.error(`Error sending auto-reply for rule ${rule.name}:`, error);
+                        // Check contact restrictions
+                        if (rule.conditions.contactRestricted) {
+                            const senderJid = message.key.remoteJid;
+                            const senderNumber = senderJid.split('@')[0];
+
+                            console.log(`Contact check - Sender: ${senderNumber}`);
+
+                            // Check if sender is in allowed contacts
+                            if (rule.conditions.allowedContacts && rule.conditions.allowedContacts.length > 0) {
+                                if (!rule.conditions.allowedContacts.includes(senderNumber)) {
+                                    console.log('Sender not in allowed contacts');
+                                    continue;
+                                }
+                            }
+
+                            // Check if sender is in excluded contacts
+                            if (rule.conditions.excludedContacts && rule.conditions.excludedContacts.includes(senderNumber)) {
+                                console.log('Sender in excluded contacts');
+                                continue;
+                            }
+                        }
+
+                        // If we get here, we should send a reply
+                        try {
+                            const jid = message.key.remoteJid;
+                            console.log(`Sending auto-reply for rule: ${rule.name} to ${jid}`);
+
+                            // Send the appropriate response
+                            if (rule.responseType === 'text') {
+                                await sock.sendMessage(jid, { text: rule.responseContent });
+                            } else if (rule.responseType === 'image' && rule.imageUrl) {
+                                await sock.sendMessage(jid, {
+                                    image: { url: rule.imageUrl },
+                                    caption: rule.responseContent
+                                });
+                            } else if (rule.responseType === 'template') {
+                                // Handle template messages if needed
+                                await sock.sendMessage(jid, { text: rule.responseContent });
+                            }
+
+                            console.log(`Auto-reply sent successfully for rule: ${rule.name}`);
+                        } catch (error) {
+                            console.error(`Error sending auto-reply for rule ${rule.name}:`, error);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error processing message:', error);
+
+                    // If it's a PreKey error, we should try to reinitialize the session
+                    if (error.name === 'PreKeyError') {
+                        console.log('PreKey error detected, attempting to reinitialize session...');
+                        try {
+                            // Delete the current session
+                            if (sessions.has(sessionId)) {
+                                const currentSession = sessions.get(sessionId);
+                                if (currentSession?.sock) {
+                                    try {
+                                        if (typeof currentSession.sock.end === 'function') {
+                                            currentSession.sock.end();
+                                        }
+                                        if (typeof currentSession.sock.removeAllListeners === 'function') {
+                                            currentSession.sock.removeAllListeners();
+                                        }
+                                    } catch (cleanupError) {
+                                        console.error('Error cleaning up session:', cleanupError);
+                                    }
+                                }
+                                sessions.delete(sessionId);
+                            }
+
+                            // Create a new session
+                            await createSession(sessionId, userId);
+                            console.log('Session reinitialized successfully');
+                        } catch (reinitError) {
+                            console.error('Error reinitializing session:', reinitError);
+                        }
                     }
                 }
             }
