@@ -404,20 +404,42 @@ async function createSession(sessionId, userId) {
                             const jid = message.key.remoteJid;
                             console.log(`Sending auto-reply for rule: ${rule.name} to ${jid}`);
 
+                            // --- Prepare reply options ---
+                            const replyOptions = { quoted: message };
+                            // --- End reply options ---
+
                             // Send the appropriate response
                             if (rule.responseType === 'text') {
-                                await sock.sendMessage(jid, { text: rule.responseContent });
+                                // --- Send text reply ---
+                                await sock.sendMessage(jid, { text: rule.responseContent }, replyOptions);
+                                // --- End text reply ---
                             } else if (rule.responseType === 'image' && rule.imageUrl) {
+                                // --- Send image reply ---
                                 await sock.sendMessage(jid, {
                                     image: { url: rule.imageUrl },
                                     caption: rule.responseContent
-                                });
+                                }, replyOptions);
+                                // --- End image reply ---
                             } else if (rule.responseType === 'template') {
                                 // Handle template messages if needed
-                                await sock.sendMessage(jid, { text: rule.responseContent });
+                                // --- Send template reply (as text for now) ---
+                                await sock.sendMessage(jid, { text: rule.responseContent }, replyOptions);
+                                // --- End template reply ---
                             }
 
                             console.log(`Auto-reply sent successfully for rule: ${rule.name}`);
+
+                            // --- React to the original message (if emoji is set) ---
+                            try {
+                                if (rule.reactionEmoji && rule.reactionEmoji.trim() !== '') {
+                                    await sock.sendMessage(jid, { react: { text: rule.reactionEmoji, key: message.key } });
+                                    console.log(`Reacted '${rule.reactionEmoji}' to message from ${jid} for rule: ${rule.name}`);
+                                }
+                            } catch (reactError) {
+                                console.error(`Error reacting to message for rule ${rule.name}:`, reactError);
+                            }
+                            // --- End react ---
+
                         } catch (error) {
                             console.error(`Error sending auto-reply for rule ${rule.name}:`, error);
                         }
@@ -924,6 +946,7 @@ app.post('/api/auto-reply-rules', auth, async (req, res) => {
             responseType,
             responseContent,
             imageUrl,
+            reactionEmoji,
             conditions
         } = req.body;
 
@@ -942,13 +965,18 @@ app.post('/api/auto-reply-rules', auth, async (req, res) => {
             responseType,
             responseContent,
             imageUrl,
-            conditions: conditions || {}
+            reactionEmoji,
+            conditions: conditions || {},
+            isActive: true
         });
 
         await rule.save();
         res.status(201).json({ rule });
     } catch (error) {
         console.error('Error creating auto-reply rule:', error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ error: error.message });
+        }
         res.status(500).json({ error: error.message });
     }
 });
@@ -963,10 +991,17 @@ app.put('/api/auto-reply-rules/:ruleId', auth, async (req, res) => {
             return res.status(404).json({ error: 'Rule not found' });
         }
 
-        // Update the rule
+        // Update the rule - ensuring only valid fields are updated
+        const allowedUpdates = ['name', 'triggerType', 'triggerValue', 'responseType', 'responseContent', 'imageUrl', 'reactionEmoji', 'conditions', 'isActive'];
         Object.keys(updateData).forEach(key => {
-            if (key !== '_id' && key !== 'userId') {
-                rule[key] = updateData[key];
+            if (allowedUpdates.includes(key)) {
+                // Special handling for conditions to merge if needed, or overwrite
+                if (key === 'conditions') {
+                    // Simple overwrite for now, could be more complex merge if needed
+                    rule.conditions = { ...rule.conditions, ...updateData.conditions };
+                } else {
+                    rule[key] = updateData[key];
+                }
             }
         });
 
@@ -974,6 +1009,9 @@ app.put('/api/auto-reply-rules/:ruleId', auth, async (req, res) => {
         res.json({ rule });
     } catch (error) {
         console.error('Error updating auto-reply rule:', error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ error: error.message });
+        }
         res.status(500).json({ error: error.message });
     }
 });
@@ -1070,50 +1108,13 @@ app.delete('/api/cancel-pending-session/:sessionId', auth, async (req, res) => {
 
             // 6. Delete from DB
             await Session.findOneAndDelete({ sessionId, userId });
-            console.log(`[${userId}] Session ${sessionId} deleted from database.`);
 
-            // 7. Drop auth collection
-            try {
-                const authCollectionName = `authState_${sessionId}`;
-                await mongoose.connection.db.dropCollection(authCollectionName);
-                console.log(`[${userId}] Dropped auth collection: ${authCollectionName}`);
-            } catch (dropError) {
-                // Ignore error if collection doesn't exist (e.g., cleanup race condition)
-                if (dropError.message.includes('ns not found')) {
-                    console.log(`[${userId}] Auth collection for ${sessionId} not found, likely already dropped.`);
-                } else {
-                    console.error(`[${userId}] Error dropping auth collection for session ${sessionId}:`, dropError);
-                }
-            }
-
-            res.json({ success: true, message: 'Pending session cancelled successfully.' });
-
+            res.json({ success: true });
         } else {
-            // Session not found in memory. It might have already connected/disconnected or been cancelled.
-            // Check DB to be sure.
-            const sessionInDb = await Session.findOne({ sessionId, userId });
-            if (sessionInDb) {
-                console.log(`[${userId}] Session ${sessionId} not in memory, but found in DB with status ${sessionInDb.status}. Likely already processed or cleaned up.`);
-                // If it's still 'connecting' in DB but not memory, something is odd, but we can try DB cleanup.
-                if (sessionInDb.status === 'connecting') {
-                    await Session.findOneAndDelete({ sessionId, userId });
-                    console.log(`[${userId}] Deleted lingering 'connecting' session ${sessionId} from DB.`);
-                }
-                return res.status(200).json({ success: true, message: 'Session already processed or cleaned up.' });
-            } else {
-                console.log(`[${userId}] Session ${sessionId} not found in memory or DB.`);
-                return res.status(404).json({ error: 'Session not found or already cancelled.' });
-            }
+            res.status(404).json({ error: 'Session not found' });
         }
     } catch (error) {
-        console.error(`[${userId}] Error cancelling pending session ${sessionId}:`, error);
-        res.status(500).json({ error: 'Internal server error during session cancellation.' });
+        console.error(`Error cancelling session ${sessionId}:`, error);
+        res.status(500).json({ error: error.message });
     }
-});
-
-// Start server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    checkExistingSessions();
 });

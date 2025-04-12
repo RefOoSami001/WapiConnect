@@ -469,6 +469,30 @@
                                     </div>
                                 </div>
 
+                                <!-- Add Image URL input group -->
+                                <div class="form-row" id="rule-image-url-group"
+                                    style="display: none; opacity: 0; transition: opacity 0.3s ease;">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Image URL</label>
+                                        <input type="text" class="parameter-input" id="rule-image-url"
+                                            placeholder="Enter URL of the image for the reply">
+                                        <div class="parameter-desc">Required if Response Type is Image</div>
+                                    </div>
+                                </div>
+                                <!-- End Image URL input group -->
+
+                                <!-- Add Reaction Emoji input group -->
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Reaction Emoji (Optional)</label>
+                                        <input type="text" class="parameter-input" id="rule-reaction-emoji"
+                                            placeholder="e.g., 👍 or leave blank for no reaction">
+                                        <div class="parameter-desc">Single emoji to react with, or blank to disable.
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Reaction Emoji input group -->
+
                                 <button class="action-button" onclick="runApiRequest('create-auto-reply')">
                                     <i class="bi bi-plus-circle me-2"></i>Create Rule
                                 </button>
@@ -1109,28 +1133,57 @@ https://zynchat.koyeb.app/api/check-sessions \
 
             const urlGroup = document.getElementById('image-url-group');
             const base64Group = document.getElementById('image-base64-group');
+            const groups = [urlGroup, base64Group];
 
-            // First hide all with fade out
-            if (urlGroup.style.display !== 'none') {
-                urlGroup.style.opacity = '0';
-                setTimeout(() => { urlGroup.style.display = 'none'; }, 200);
-            }
+            // Hide all groups initially
+            groups.forEach(group => {
+                if (group && group.style.display !== 'none') {
+                    group.style.opacity = '0';
+                    setTimeout(() => { group.style.display = 'none'; }, 200);
+                }
+            });
 
-            if (base64Group.style.display !== 'none') {
-                base64Group.style.opacity = '0';
-                setTimeout(() => { base64Group.style.display = 'none'; }, 200);
-            }
-
-            // Then show the selected one with fade in
+            // Show the selected one after a delay
             setTimeout(() => {
+                let targetGroup = null;
                 if (imageTypeSelect.value === 'url') {
-                    urlGroup.style.display = 'block';
-                    setTimeout(() => { urlGroup.style.opacity = '1'; }, 50);
+                    targetGroup = urlGroup;
                 } else if (imageTypeSelect.value === 'base64') {
-                    base64Group.style.display = 'block';
-                    setTimeout(() => { base64Group.style.opacity = '1'; }, 50);
+                    targetGroup = base64Group;
+                }
+
+                if (targetGroup) {
+                    targetGroup.style.display = 'block';
+                    // Force reflow before adding opacity class/style
+                    void targetGroup.offsetWidth;
+                    targetGroup.style.opacity = '1';
                 }
             }, 210);
+        }
+
+        // Function to handle response type changes with animation (Auto Reply)
+        function handleAutoReplyResponseTypeChange() {
+            const responseTypeSelect = document.getElementById('response-type');
+            if (!responseTypeSelect) return;
+
+            const imageUrlGroup = document.getElementById('rule-image-url-group');
+            if (!imageUrlGroup) return; // Exit if the group doesn't exist
+
+            if (responseTypeSelect.value === 'image') {
+                // Show the image URL input
+                imageUrlGroup.style.display = 'block';
+                // Force reflow before changing opacity
+                void imageUrlGroup.offsetWidth;
+                imageUrlGroup.style.opacity = '1';
+            } else {
+                // Hide the image URL input
+                imageUrlGroup.style.opacity = '0';
+                setTimeout(() => {
+                    imageUrlGroup.style.display = 'none';
+                    // Optionally clear the input when hiding
+                    // document.getElementById('rule-image-url').value = '';
+                }, 300); // Match the transition duration
+            }
         }
 
         // Set up tab navigation
@@ -1210,14 +1263,23 @@ https://zynchat.koyeb.app/api/check-sessions \
             // Initial curl command update
             updateCurlCommand();
 
-            // Initialize image type select handling
+            // Initialize image type select handling for SEND MESSAGE section
             const imageTypeSelect = document.getElementById('image-type');
             if (imageTypeSelect) {
-                handleImageTypeChange();
-
+                handleImageTypeChange(); // Initial state
                 imageTypeSelect.addEventListener('change', function () {
-                    handleImageTypeChange();
-                    updateCurlCommand();
+                    handleImageTypeChange(); // Handle changes
+                    updateCurlCommand(); // Update curl on change
+                });
+            }
+
+            // Initialize response type select handling for AUTO REPLY section
+            const responseTypeSelect = document.getElementById('response-type');
+            if (responseTypeSelect) {
+                handleAutoReplyResponseTypeChange(); // Initial state
+                responseTypeSelect.addEventListener('change', function () {
+                    handleAutoReplyResponseTypeChange(); // Handle changes
+                    updateCurlCommand(); // Update curl on change
                 });
             }
 
@@ -1288,11 +1350,9 @@ https://zynchat.koyeb.app/api/check-sessions \\
 
                     let imageData = null;
                     if (imageType === 'url') {
-                        const url = document.getElementById('image-url').value || 'https://example.com/image.jpg';
-                        imageData = { url: url };
+                        imageData = { url: document.getElementById('image-url').value };
                     } else if (imageType === 'base64') {
-                        const base64 = document.getElementById('image-base64').value || 'BASE64_DATA';
-                        imageData = base64;
+                        imageData = document.getElementById('image-base64').value;
                     }
 
                     const messagePayload = {
@@ -1358,6 +1418,13 @@ https://zynchat.koyeb.app/api/get-contacts \\
                         const triggerValue = document.getElementById('trigger-value').value || 'keyword';
                         const responseType = document.getElementById('response-type').value || 'text';
                         const responseContent = document.getElementById('response-content').value || 'Response message';
+                        let imageUrl = null;
+                        if (responseType === 'image') {
+                            imageUrl = document.getElementById('rule-image-url').value || null;
+                        }
+                        // --- Read the reaction emoji ---
+                        const reactionEmoji = document.getElementById('rule-reaction-emoji').value.trim() || null;
+                        // --- End reaction emoji reading ---
 
                         const rulePayload = {
                             name: ruleName,
@@ -1366,7 +1433,10 @@ https://zynchat.koyeb.app/api/get-contacts \\
                             triggerValue: triggerValue,
                             responseType: responseType,
                             responseContent: responseContent,
-                            imageUrl: null,
+                            imageUrl: imageUrl,
+                            // --- Use the read reactionEmoji ---
+                            reactionEmoji: reactionEmoji,
+                            // --- End reactionEmoji usage ---
                             conditions: {
                                 timeRestricted: false,
                                 startTime: null,
@@ -1509,7 +1579,12 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
                         triggerValue,
                         responseType,
                         responseContent,
-                        imageUrl: null,
+                        // --- Read the image URL if response type is image ---
+                        imageUrl: document.getElementById('rule-image-url').value || null,
+                        // --- End imageUrl usage ---
+                        // --- Read the reaction emoji ---
+                        reactionEmoji: document.getElementById('rule-reaction-emoji').value.trim() || null,
+                        // --- End reaction emoji reading ---
                         conditions: {
                             timeRestricted: false,
                             startTime: null,
