@@ -37,6 +37,41 @@
             font-weight: 500;
             color: var(--text-primary);
         }
+
+        .premium-points-link {
+            text-decoration: none;
+            margin-left: 1rem;
+        }
+
+        .premium-points-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            background-color: #ECFAF4;
+            /* soft mint background */
+            color: #3a7f5d;
+            /* premium green text */
+            border: 1px solid #d3efe4;
+            /* subtle green border */
+            box-shadow: 0 2px 6px rgba(58, 127, 93, 0.1);
+            /* soft green shadow */
+            transition: all 0.2s ease-in-out;
+        }
+
+        .premium-points-display:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(58, 127, 93, 0.15);
+        }
+
+        .premium-points-display .bi-gem {
+            font-size: 1rem;
+            color: #4caf83;
+            /* gem with soft green tone */
+        }
     </style>
 </head>
 
@@ -61,24 +96,30 @@
                         <i class="bi bi-code-slash"></i>
                         <span>API Docs</span>
                     </a>
+
                 </div>
                 <ul class="navbar-nav ms-auto">
+                    <!-- Premium Points Display (Outside user-info, inside the main link) -->
+                    <a href="https://wa.me/201011508719" target="_blank" class="premium-points-link">
+                        <div class="premium-points-display" id="user-points-display">
+                            <i class="bi bi-gem"></i> <!-- Changed icon -->
+                            <span id="points-balance">0.00</span> EGP <!-- Removed "Points:", added EGP -->
+                        </div>
+                    </a>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle user-profile" href="#" id="userDropdown" role="button"
                             data-bs-toggle="dropdown">
-                            <!-- Image avatar (initially hidden) -->
+                            <!-- Avatar Section -->
                             <img src="" alt="User Avatar" id="user-avatar-image" class="user-avatar d-none">
-                            <!-- Text avatar (fallback) -->
                             <div class="user-avatar" id="user-avatar-initials">
                                 <span id="user-avatar-letter">U</span>
                             </div>
+                            <!-- User Name Section -->
                             <div class="user-info">
                                 <span class="user-name" id="user-name">User</span>
-                                <div class="user-points" id="user-points-display"
-                                    style="font-size: 0.85rem; color: var(--text-light);">
-                                    <i class="bi bi-coin"></i> <span id="points-balance">0</span>$
-                                </div>
+                                <!-- Points display moved outside this div -->
                             </div>
+
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
@@ -90,6 +131,7 @@
                         </ul>
                     </li>
                 </ul>
+
             </div>
         </div>
     </nav>
@@ -1337,85 +1379,107 @@ https://zynchat.koyeb.app/api/check-sessions \
             const activeTabId = document.querySelector('.sidebar-tab.active').getAttribute('data-target');
             let curlCommand = '';
 
+            // Helper function to get value or placeholder
+            const getValue = (id, placeholder) => document.getElementById(id)?.value || placeholder;
+
             switch (activeTabId) {
                 case '#auth-section':
                     curlCommand = `curl -X GET \\
-https://zynchat.koyeb.app/api/check-sessions \\
+https://wapiconnect.koyeb.app/api/check-sessions \\
 -H 'Authorization: Bearer ${token}'`;
                     break;
 
                 case '#sessions-section':
-                    // Check which form field is filled to determine the command
-                    const deleteSessionId = document.getElementById('delete-session-id').value;
-
-                    if (deleteSessionId) {
+                    const deleteSessionId = getValue('delete-session-id', 'SESSION_ID');
+                    if (document.getElementById('delete-session-id')?.value) { // Only show delete if ID is actually entered
                         curlCommand = `curl -X DELETE \\
-https://zynchat.koyeb.app/api/delete-session/${deleteSessionId} \\
+https://wapiconnect.koyeb.app/api/delete-session/${deleteSessionId} \\
 -H 'Authorization: Bearer ${token}'`;
                     } else {
+                        // Default to check sessions if no delete ID is present
                         curlCommand = `curl -X GET \\
-https://zynchat.koyeb.app/api/check-sessions \\
+https://wapiconnect.koyeb.app/api/check-sessions \\
 -H 'Authorization: Bearer ${token}'`;
                     }
                     break;
 
                 case '#messaging-section':
-                    const sendSessionId = document.getElementById('send-session-id').value;
-                    const numbers = document.getElementById('send-numbers').value;
-                    const message = document.getElementById('send-message').value;
-                    const imageType = document.getElementById('image-type').value;
+                    const sendSessionId = getValue('send-session-id', 'SESSION_ID');
+                    const numbers = getValue('send-numbers', '+1234567890\n+9876543210');
+                    const message = getValue('send-message', 'Your message content');
+                    const imageType = getValue('image-type', 'none');
 
                     let imageData = null;
                     if (imageType === 'url') {
-                        imageData = { url: document.getElementById('image-url').value };
+                        imageData = { url: getValue('image-url', 'https://example.com/image.jpg') };
                     } else if (imageType === 'base64') {
-                        imageData = document.getElementById('image-base64').value;
+                        imageData = getValue('image-base64', 'BASE64_ENCODED_IMAGE_DATA');
                     }
 
                     const messagePayload = {
                         sessionId: sendSessionId,
                         numbers: numbers,
                         message: message,
-                        imageData: imageData
+                        ...(imageData && { imageData: imageData }) // Conditionally add imageData
                     };
 
                     curlCommand = `curl -X POST \\
-https://zynchat.koyeb.app/api/send-message \\
+https://wapiconnect.koyeb.app/api/send-message \\
 -H 'Authorization: Bearer ${token}' \\
 -H 'Content-Type: application/json' \\
 -d '${JSON.stringify(messagePayload, null, 2)}'`;
                     break;
 
                 case '#contacts-section':
-                    // Check which form field is filled to determine the command
-                    const contactsSessionId = document.getElementById('contacts-session-id').value;
-                    const source = document.getElementById('contacts-source').value;
+                    const contactsSessionId = getValue('contacts-session-id', 'SESSION_ID');
+                    const source = getValue('contacts-source', 'contacts');
+                    const groupIdInput = document.getElementById('group-id');
+                    const groupSessionIdInput = document.getElementById('group-session-id');
 
-                    method = 'POST';
-                    endpoint = '/api/get-contacts';
-                    body = {
-                        sessionId: contactsSessionId,
-                        source: source,
-                        options: {
-                            includeName: true,
-                            includeStatus: true,
-                            includeGroupName: true,
-                            includeAdmin: true
-                        }
-                    };
+                    if (groupIdInput && groupIdInput.value) {
+                        const groupSessionId = getValue('group-session-id', 'SESSION_ID');
+                        const groupId = getValue('group-id', 'GROUP_ID');
+                        const groupPayload = {
+                            sessionId: groupSessionId,
+                            groupId: groupId
+                        };
+                        curlCommand = `curl -X POST \\
+https://wapiconnect.koyeb.app/api/get-group-members \\
+-H 'Authorization: Bearer ${token}' \\
+-H 'Content-Type: application/json' \\
+-d '${JSON.stringify(groupPayload, null, 2)}'`;
+                    } else {
+                        const contactsPayload = {
+                            sessionId: contactsSessionId,
+                            source: source,
+                            options: { // Keep options static for example
+                                includeName: true,
+                                includeStatus: true,
+                                includeGroupName: true,
+                                includeAdmin: true
+                            }
+                        };
+                        curlCommand = `curl -X POST \\
+https://wapiconnect.koyeb.app/api/get-contacts \\
+-H 'Authorization: Bearer ${token}' \\
+-H 'Content-Type: application/json' \\
+-d '${JSON.stringify(contactsPayload, null, 2)}'`;
+                    }
                     break;
 
                 case '#auto-reply-section':
-                    // Check which form fields are filled to determine the command
-                    if (document.getElementById('rule-name') && document.getElementById('rule-name').value) {
-                        // Create rule
-                        const ruleName = document.getElementById('rule-name').value || 'rule1';
-                        const ruleSessionId = document.getElementById('rule-session-id').value;
-                        const triggerType = document.getElementById('trigger-type').value;
-                        const triggerValue = document.getElementById('trigger-value').value;
-                        const responseType = document.getElementById('response-type').value;
-                        const responseContent = document.getElementById('response-content').value;
-                        const imageUrl = responseType === 'image' ? document.getElementById('rule-image-url').value : null;
+                    const ruleNameInput = document.getElementById('rule-name');
+                    const toggleRuleInput = document.getElementById('toggle-rule-id');
+                    const deleteRuleInput = document.getElementById('delete-rule-id');
+
+                    if (ruleNameInput && ruleNameInput.value) {
+                        const ruleName = getValue('rule-name', 'My Auto Reply');
+                        const ruleSessionId = getValue('rule-session-id', 'SESSION_ID');
+                        const triggerType = getValue('trigger-type', 'contains');
+                        const triggerValue = getValue('trigger-value', 'keyword');
+                        const responseType = getValue('response-type', 'text');
+                        const responseContent = getValue('response-content', 'Default response message');
+                        const imageUrl = responseType === 'image' ? getValue('rule-image-url', 'https://example.com/reply.jpg') : null;
 
                         const rulePayload = {
                             name: ruleName,
@@ -1424,8 +1488,8 @@ https://zynchat.koyeb.app/api/send-message \\
                             triggerValue,
                             responseType,
                             responseContent,
-                            imageUrl: imageUrl,
-                            conditions: {
+                            ...(imageUrl && { imageUrl: imageUrl }), // Conditionally add imageUrl
+                            conditions: { // Keep conditions static for example
                                 timeRestricted: false,
                                 startTime: null,
                                 endTime: null,
@@ -1435,30 +1499,25 @@ https://zynchat.koyeb.app/api/send-message \\
                                 excludedContacts: []
                             }
                         };
-
                         curlCommand = `curl -X POST \\
-https://zynchat.koyeb.app/api/auto-reply-rules \\
+https://wapiconnect.koyeb.app/api/auto-reply-rules \\
 -H 'Authorization: Bearer ${token}' \\
 -H 'Content-Type: application/json' \\
 -d '${JSON.stringify(rulePayload, null, 2)}'`;
-                    } else if (document.getElementById('toggle-rule-id') && document.getElementById('toggle-rule-id').value) {
-                        // Toggle rule
-                        const toggleRuleId = document.getElementById('toggle-rule-id').value || 'RULE_ID';
-
+                    } else if (toggleRuleInput && toggleRuleInput.value) {
+                        const toggleRuleId = getValue('toggle-rule-id', 'RULE_ID');
                         curlCommand = `curl -X POST \\
-https://zynchat.koyeb.app/api/auto-reply-rules/${toggleRuleId}/toggle \\
+https://wapiconnect.koyeb.app/api/auto-reply-rules/${toggleRuleId}/toggle \\
 -H 'Authorization: Bearer ${token}'`;
-                    } else if (document.getElementById('delete-rule-id') && document.getElementById('delete-rule-id').value) {
-                        // Delete rule
-                        const deleteRuleId = document.getElementById('delete-rule-id').value || 'RULE_ID';
-
+                    } else if (deleteRuleInput && deleteRuleInput.value) {
+                        const deleteRuleId = getValue('delete-rule-id', 'RULE_ID');
                         curlCommand = `curl -X DELETE \\
-https://zynchat.koyeb.app/api/auto-reply-rules/${deleteRuleId} \\
+https://wapiconnect.koyeb.app/api/auto-reply-rules/${deleteRuleId} \\
 -H 'Authorization: Bearer ${token}'`;
                     } else {
-                        // Default for auto-reply section
+                        // Default to list rules
                         curlCommand = `curl -X GET \\
-https://zynchat.koyeb.app/api/auto-reply-rules \\
+https://wapiconnect.koyeb.app/api/auto-reply-rules \\
 -H 'Authorization: Bearer ${token}'`;
                     }
                     break;
@@ -1466,11 +1525,13 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
 
             // Update the curl code display with animation
             const curlElement = document.getElementById('curl-code');
+            // Use textContent for comparison, innerHTML for rendering highlighted syntax
+            const highlightedCommand = highlightSyntax(curlCommand || 'Please fill in parameters to generate command.');
             if (curlElement.textContent !== curlCommand) {
                 curlElement.style.opacity = '0.5';
                 setTimeout(() => {
-                    curlElement.textContent = curlCommand;
-                    curlElement.innerHTML = highlightSyntax(curlElement.textContent);
+                    curlElement.textContent = curlCommand || 'Please fill in parameters to generate command.'; // Store raw command for comparison
+                    curlElement.innerHTML = highlightedCommand; // Render highlighted version
                     curlElement.style.opacity = '1';
                 }, 150);
             }
@@ -1483,14 +1544,32 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
             let method = 'GET';
             let body = null;
 
+            // Helper to get input value
+            const getVal = (id) => document.getElementById(id)?.value;
+
+            // Input Validation Helper
+            const validateInput = (id, fieldName) => {
+                const value = getVal(id);
+                if (!value) {
+                    showToast(`${fieldName} is required.`, 'warning');
+                    return false;
+                }
+                return value;
+            };
+
             // Add loading animation to the button clicked
             const button = event.currentTarget;
             const originalHTML = button.innerHTML;
             button.innerHTML = `<div class="spinner-border spinner-border-sm" role="status"></div><span class="ms-2">Loading...</span>`;
             button.disabled = true;
 
+            // Validation variable
+            let isValid = true;
+            let sessionId, numbers, message, imageType, imageData, source, groupId, ruleName, triggerType, triggerValue, responseType, responseContent, imageUrl, ruleId;
+
             switch (requestType) {
                 case 'create-session':
+                    // No inputs to validate for this specific request via button
                     method = 'POST';
                     endpoint = '/api/create-session';
                     break;
@@ -1500,109 +1579,132 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
                     break;
 
                 case 'delete-session':
-                    const deleteSessionId = document.getElementById('delete-session-id').value;
+                    sessionId = validateInput('delete-session-id', 'Session ID');
+                    if (!sessionId) isValid = false;
+                    if (!isValid) break;
                     method = 'DELETE';
-                    endpoint = `/api/delete-session/${deleteSessionId}`;
+                    endpoint = `/api/delete-session/${sessionId}`;
                     break;
 
                 case 'send-message':
-                    const sendSessionId = document.getElementById('send-session-id').value;
-                    const numbers = document.getElementById('send-numbers').value;
-                    const message = document.getElementById('send-message').value;
-                    const imageType = document.getElementById('image-type').value;
-
-                    let imageData = null;
+                    sessionId = validateInput('send-session-id', 'Session ID');
+                    numbers = validateInput('send-numbers', 'Phone Numbers');
+                    message = getVal('send-message'); // Message is optional if image is sent
+                    imageType = getVal('image-type');
+                    imageData = null;
                     if (imageType === 'url') {
-                        imageData = { url: document.getElementById('image-url').value };
+                        imageData = { url: validateInput('image-url', 'Image URL') };
+                        if (!imageData.url) isValid = false;
                     } else if (imageType === 'base64') {
-                        imageData = document.getElementById('image-base64').value;
+                        imageData = validateInput('image-base64', 'Base64 Image');
+                        if (!imageData) isValid = false;
                     }
+                    // Message or image is required
+                    if (!message && !imageData) {
+                        showToast('Message or Image is required.', 'warning');
+                        isValid = false;
+                    }
+                    if (!sessionId || !numbers) isValid = false;
+                    if (!isValid) break;
 
                     method = 'POST';
                     endpoint = '/api/send-message';
-                    body = { sessionId: sendSessionId, numbers, message, imageData };
+                    body = { sessionId, numbers, message, ...(imageData && { imageData: imageData }) }; // Conditionally add
                     break;
 
                 case 'get-contacts':
-                    const contactsSessionId = document.getElementById('contacts-session-id').value;
-                    const source = document.getElementById('contacts-source').value;
+                    sessionId = validateInput('contacts-session-id', 'Session ID');
+                    source = validateInput('contacts-source', 'Source');
+                    if (!sessionId || !source) isValid = false;
+                    if (!isValid) break;
 
                     method = 'POST';
                     endpoint = '/api/get-contacts';
                     body = {
-                        sessionId: contactsSessionId,
+                        sessionId: sessionId,
                         source: source,
-                        options: {
-                            includeName: true,
-                            includeStatus: true,
-                            includeGroupName: true,
-                            includeAdmin: true
-                        }
+                        options: { includeName: true, includeStatus: true, includeGroupName: true, includeAdmin: true }
                     };
                     break;
 
                 case 'get-group-members':
-                    const groupSessionId = document.getElementById('group-session-id').value;
-                    const groupId = document.getElementById('group-id').value;
+                    sessionId = validateInput('group-session-id', 'Session ID');
+                    groupId = validateInput('group-id', 'Group ID');
+                    if (!sessionId || !groupId) isValid = false;
+                    if (!isValid) break;
 
                     method = 'POST';
                     endpoint = '/api/get-group-members';
-                    body = { sessionId: groupSessionId, groupId };
+                    body = { sessionId, groupId };
                     break;
 
                 case 'create-auto-reply':
-                    const ruleName = document.getElementById('rule-name').value;
-                    const ruleSessionId = document.getElementById('rule-session-id').value;
-                    const triggerType = document.getElementById('trigger-type').value;
-                    const triggerValue = document.getElementById('trigger-value').value;
-                    const responseType = document.getElementById('response-type').value;
-                    const responseContent = document.getElementById('response-content').value;
-                    const imageUrl = responseType === 'image' ? document.getElementById('rule-image-url').value : null;
+                    ruleName = validateInput('rule-name', 'Rule Name');
+                    sessionId = validateInput('rule-session-id', 'Session ID');
+                    triggerType = validateInput('trigger-type', 'Trigger Type');
+                    triggerValue = validateInput('trigger-value', 'Trigger Value');
+                    responseType = validateInput('response-type', 'Response Type');
+                    responseContent = validateInput('response-content', 'Response Content');
+                    imageUrl = null;
+                    if (responseType === 'image') {
+                        imageUrl = validateInput('rule-image-url', 'Image URL');
+                        if (!imageUrl) isValid = false;
+                    }
+                    if (!ruleName || !sessionId || !triggerType || !triggerValue || !responseType || !responseContent) isValid = false;
+                    if (!isValid) break;
 
                     method = 'POST';
                     endpoint = '/api/auto-reply-rules';
                     body = {
                         name: ruleName,
-                        sessionId: ruleSessionId,
+                        sessionId: sessionId,
                         triggerType,
                         triggerValue,
                         responseType,
                         responseContent,
-                        imageUrl: imageUrl,
-                        conditions: {
-                            timeRestricted: false,
-                            startTime: null,
-                            endTime: null,
-                            daysOfWeek: [],
-                            contactRestricted: false,
-                            allowedContacts: [],
-                            excludedContacts: []
-                        }
+                        ...(imageUrl && { imageUrl: imageUrl }), // Conditionally add
+                        conditions: { /* Default conditions */ }
                     };
                     break;
 
                 case 'toggle-auto-reply':
-                    const toggleRuleId = document.getElementById('toggle-rule-id').value;
-
+                    ruleId = validateInput('toggle-rule-id', 'Rule ID');
+                    if (!ruleId) isValid = false;
+                    if (!isValid) break;
                     method = 'POST';
-                    endpoint = `/api/auto-reply-rules/${toggleRuleId}/toggle`;
+                    endpoint = `/api/auto-reply-rules/${ruleId}/toggle`;
                     break;
 
                 case 'delete-auto-reply':
-                    const deleteRuleId = document.getElementById('delete-rule-id').value;
-
+                    ruleId = validateInput('delete-rule-id', 'Rule ID');
+                    if (!ruleId) isValid = false;
+                    if (!isValid) break;
                     method = 'DELETE';
-                    endpoint = `/api/auto-reply-rules/${deleteRuleId}`;
+                    endpoint = `/api/auto-reply-rules/${ruleId}`;
+                    break;
+
+                default:
+                    console.error('Unknown request type:', requestType);
+                    isValid = false;
                     break;
             }
 
-            // Make the actual API request - using the production API URL
-            makeApiRequest(endpoint, method, body).finally(() => {
-                // Restore button state
+            // If validation failed, restore button and exit
+            if (!isValid) {
                 setTimeout(() => {
                     button.innerHTML = originalHTML;
                     button.disabled = false;
-                }, 500);
+                }, 100);
+                return;
+            }
+
+            // Make the actual API request
+            makeApiRequest(endpoint, method, body).finally(() => {
+                // Restore button state after request finishes (success or fail)
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                }, 500); // Delay to allow user to see loading state briefly
             });
         }
 
