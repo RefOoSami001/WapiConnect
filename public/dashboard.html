@@ -1380,19 +1380,40 @@ https://zynchat.koyeb.app/api/send-message \\
                     // Check which form field is filled to determine the command
                     const contactsSessionId = document.getElementById('contacts-session-id').value;
                     const source = document.getElementById('contacts-source').value;
+                    const groupIdInput = document.getElementById('group-id');
+                    const groupSessionIdInput = document.getElementById('group-session-id');
 
-                    method = 'POST';
-                    endpoint = '/api/get-contacts';
-                    body = {
-                        sessionId: contactsSessionId,
-                        source: source,
-                        options: {
-                            includeName: true,
-                            includeStatus: true,
-                            includeGroupName: true,
-                            includeAdmin: true
-                        }
-                    };
+                    if (groupIdInput && groupIdInput.value) {
+                        // Get Group Members command
+                        const groupSessionId = groupSessionIdInput.value || 'SESSION_ID';
+                        const groupId = groupIdInput.value || 'GROUP_ID';
+                        const groupPayload = {
+                            sessionId: groupSessionId,
+                            groupId: groupId
+                        };
+                        curlCommand = `curl -X POST \\
+https://wapiconnect.koyeb.app/api/get-group-members \\
+-H 'Authorization: Bearer ${token}' \\
+-H 'Content-Type: application/json' \\
+-d '${JSON.stringify(groupPayload, null, 2)}'`;
+                    } else {
+                        // Get Contacts command
+                        const contactsPayload = {
+                            sessionId: contactsSessionId || 'SESSION_ID',
+                            source: source,
+                            options: {
+                                includeName: true,
+                                includeStatus: true,
+                                includeGroupName: true,
+                                includeAdmin: true
+                            }
+                        };
+                        curlCommand = `curl -X POST \\
+https://wapiconnect.koyeb.app/api/get-contacts \\
+-H 'Authorization: Bearer ${token}' \\
+-H 'Content-Type: application/json' \\
+-d '${JSON.stringify(contactsPayload, null, 2)}'`;
+                    }
                     break;
 
                 case '#auto-reply-section':
@@ -1400,20 +1421,20 @@ https://zynchat.koyeb.app/api/send-message \\
                     if (document.getElementById('rule-name') && document.getElementById('rule-name').value) {
                         // Create rule
                         const ruleName = document.getElementById('rule-name').value || 'rule1';
-                        const ruleSessionId = document.getElementById('rule-session-id').value || 'SESSION_ID';
-                        const triggerType = document.getElementById('trigger-type').value || 'contains';
-                        const triggerValue = document.getElementById('trigger-value').value || 'keyword';
-                        const responseType = document.getElementById('response-type').value || 'text';
-                        const responseContent = document.getElementById('response-content').value || 'Response message';
-                        const imageUrl = responseType === 'image' ? (document.getElementById('rule-image-url').value || 'https://i.postimg.cc/J0bz7nCv/logo.png') : null;
+                        const ruleSessionId = document.getElementById('rule-session-id').value;
+                        const triggerType = document.getElementById('trigger-type').value;
+                        const triggerValue = document.getElementById('trigger-value').value;
+                        const responseType = document.getElementById('response-type').value;
+                        const responseContent = document.getElementById('response-content').value;
+                        const imageUrl = responseType === 'image' ? document.getElementById('rule-image-url').value : null;
 
                         const rulePayload = {
                             name: ruleName,
                             sessionId: ruleSessionId,
-                            triggerType: triggerType,
-                            triggerValue: triggerValue,
-                            responseType: responseType,
-                            responseContent: responseContent,
+                            triggerType,
+                            triggerValue,
+                            responseType,
+                            responseContent,
                             imageUrl: imageUrl,
                             conditions: {
                                 timeRestricted: false,
