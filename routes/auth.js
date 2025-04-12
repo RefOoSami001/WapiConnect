@@ -60,7 +60,8 @@ router.get('/google/callback',
                 id: req.user._id,
                 email: req.user.email,
                 name: req.user.name,
-                profilePictureUrl: req.user.profilePictureUrl
+                profilePictureUrl: req.user.profilePictureUrl,
+                pointsBalance: req.user.pointsBalance
             });
 
             res.redirect(`/dashboard.html?token=${token}&user=${encodeURIComponent(userData)}`);

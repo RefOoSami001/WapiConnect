@@ -74,6 +74,10 @@
                             </div>
                             <div class="user-info">
                                 <span class="user-name" id="user-name">User</span>
+                                <div class="user-points" id="user-points-display"
+                                    style="font-size: 0.85rem; color: var(--text-light);">
+                                    <i class="bi bi-coin"></i> <span id="points-balance">0</span>$
+                                </div>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -671,6 +675,12 @@ https://zynchat.koyeb.app/api/check-sessions \
             const user = JSON.parse(localStorage.getItem('user'));
             if (user) {
                 document.getElementById('user-name').textContent = user.name;
+
+                // Display points balance
+                const pointsBalanceElement = document.getElementById('points-balance');
+                if (pointsBalanceElement) {
+                    pointsBalanceElement.textContent = user.pointsBalance !== undefined ? user.pointsBalance.toFixed(2) : 'N/A'; // Format points
+                }
 
                 const imgAvatar = document.getElementById('user-avatar-image');
                 const initialsAvatar = document.getElementById('user-avatar-initials');
@@ -1380,40 +1390,19 @@ https://zynchat.koyeb.app/api/send-message \\
                     // Check which form field is filled to determine the command
                     const contactsSessionId = document.getElementById('contacts-session-id').value;
                     const source = document.getElementById('contacts-source').value;
-                    const groupIdInput = document.getElementById('group-id');
-                    const groupSessionIdInput = document.getElementById('group-session-id');
 
-                    if (groupIdInput && groupIdInput.value) {
-                        // Get Group Members command
-                        const groupSessionId = groupSessionIdInput.value || 'SESSION_ID';
-                        const groupId = groupIdInput.value || 'GROUP_ID';
-                        const groupPayload = {
-                            sessionId: groupSessionId,
-                            groupId: groupId
-                        };
-                        curlCommand = `curl -X POST \\
-https://wapiconnect.koyeb.app/api/get-group-members \\
--H 'Authorization: Bearer ${token}' \\
--H 'Content-Type: application/json' \\
--d '${JSON.stringify(groupPayload, null, 2)}'`;
-                    } else {
-                        // Get Contacts command
-                        const contactsPayload = {
-                            sessionId: contactsSessionId || 'SESSION_ID',
-                            source: source,
-                            options: {
-                                includeName: true,
-                                includeStatus: true,
-                                includeGroupName: true,
-                                includeAdmin: true
-                            }
-                        };
-                        curlCommand = `curl -X POST \\
-https://wapiconnect.koyeb.app/api/get-contacts \\
--H 'Authorization: Bearer ${token}' \\
--H 'Content-Type: application/json' \\
--d '${JSON.stringify(contactsPayload, null, 2)}'`;
-                    }
+                    method = 'POST';
+                    endpoint = '/api/get-contacts';
+                    body = {
+                        sessionId: contactsSessionId,
+                        source: source,
+                        options: {
+                            includeName: true,
+                            includeStatus: true,
+                            includeGroupName: true,
+                            includeAdmin: true
+                        }
+                    };
                     break;
 
                 case '#auto-reply-section':
@@ -1663,6 +1652,25 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
                 if (response.ok) {
                     statusElement.textContent = `${response.status} ${response.statusText}`;
                     statusElement.className = 'status-code status-success';
+
+                    // Check if the request potentially deducted points and update display
+                    // We don't know the exact cost here, so fetch the latest user data
+                    // Alternatively, the backend could return the new balance
+                    if (method !== 'GET') { // Assume POST/PUT/DELETE might deduct points
+                        try {
+                            const meResponse = await fetch('/api/auth/me', {
+                                headers: addAuthHeader()
+                            });
+                            if (meResponse.ok) {
+                                const meData = await meResponse.json();
+                                if (meData.user && meData.user.pointsBalance !== undefined) {
+                                    updatePointsDisplay(meData.user.pointsBalance);
+                                }
+                            }
+                        } catch (meError) {
+                            console.error('Error fetching updated user data after request:', meError);
+                        }
+                    }
                 } else {
                     statusElement.textContent = `${response.status} ${response.statusText}`;
                     statusElement.className = 'status-code status-error';
@@ -1718,7 +1726,21 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
                     sidebar.classList.toggle('expanded');
                 });
             }
-        }); 
+        });
+
+        // --- New Function: Update Points Display ---
+        function updatePointsDisplay(newBalance) {
+            const pointsBalanceElement = document.getElementById('points-balance');
+            if (pointsBalanceElement) {
+                pointsBalanceElement.textContent = newBalance !== undefined ? newBalance.toFixed(2) : 'N/A';
+            }
+            // Update localStorage as well
+            const user = getCurrentUser();
+            if (user) {
+                user.pointsBalance = newBalance;
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+        }
     </script>
 </body>
 

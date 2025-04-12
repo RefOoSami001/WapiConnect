@@ -23,6 +23,46 @@ const session = require('express-session');
 const Session = require('./models/Session');
 const { router: authRouter, auth } = require('./routes/auth');
 const AutoReplyRule = require('./models/AutoReplyRule');
+const User = require('./models/User'); // Import User model
+
+// --- Point System Costs ---
+const COSTS = {
+    CREATE_SESSION: 5,
+    SEND_MESSAGE: 0.1, // Per message
+    AUTO_REPLY: 0.05, // Per reply
+    FETCH_CONTACTS: 1,
+    FETCH_GROUP_MEMBERS: 1,
+    CREATE_AUTO_REPLY_RULE: 2,
+};
+
+// Helper function to check and deduct points
+async function deductPoints(userId, cost) {
+    if (!userId || cost <= 0) return true; // Don't deduct if no user or cost is zero/negative
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            console.error(`[Points] User not found for deduction: ${userId}`);
+            return false; // User not found
+        }
+
+        if (user.pointsBalance >= cost) {
+            user.pointsBalance -= cost;
+            // Round to avoid floating point issues (e.g., 4 decimal places)
+            user.pointsBalance = Math.round(user.pointsBalance * 10000) / 10000;
+            await user.save();
+            console.log(`[Points] Deducted ${cost} points from user ${userId}. New balance: ${user.pointsBalance}`);
+            return true; // Sufficient points
+        } else {
+            console.log(`[Points] Insufficient points for user ${userId}. Required: ${cost}, Balance: ${user.pointsBalance}`);
+            return false; // Insufficient points
+        }
+    } catch (error) {
+        console.error(`[Points] Error deducting points for user ${userId}:`, error);
+        return false; // Error occurred
+    }
+}
+// --- End Point System ---
 
 // Passport config (Import after User model is potentially defined)
 require('./config/passport')(passport);
@@ -423,6 +463,18 @@ async function createSession(sessionId, userId) {
 
                         // If we get here, we should send a reply
                         try {
+                            // --- Point Check for Auto-Reply ---
+                            const autoReplyCost = COSTS.AUTO_REPLY;
+                            const canAffordReply = await deductPoints(session.userId, autoReplyCost);
+
+                            if (!canAffordReply) {
+                                console.log(`[AutoReply] User ${session.userId} cannot afford auto-reply cost ${autoReplyCost}. Skipping reply.`);
+                                // Optional: Send a one-time notification to the user? (Careful not to spam)
+                                // await sock.sendMessage(session.userId + '@s.whatsapp.net', { text: 'Your auto-reply could not be sent due to insufficient points.' });
+                                continue; // Skip sending this reply
+                            }
+                            // --- End Point Check ---
+
                             const jid = message.key.remoteJid;
                             console.log(`Sending auto-reply for rule: ${rule.name} to ${jid} (replying to message)`);
 
@@ -499,6 +551,13 @@ app.post('/api/create-session', auth, async (req, res) => {
     if (!req.user) {
         return res.status(401).json({ error: 'Authentication required.' });
     }
+    // --- Point Check ---
+    const cost = COSTS.CREATE_SESSION;
+    const canAfford = await deductPoints(req.user._id, cost);
+    if (!canAfford) {
+        return res.status(402).json({ error: 'Insufficient points to create a new session.' }); // 402 Payment Required
+    }
+    // --- End Point Check ---
     const sessionId = Date.now().toString();
     await createSession(sessionId, req.user._id);
     res.json({ sessionId });
@@ -631,8 +690,16 @@ app.post('/api/send-message', auth, validatePhoneNumber, async (req, res) => {
         return res.status(404).json({ error: 'Session not found' });
     }
 
+    // --- Point Check ---
+    const phoneNumbers = numbers.split('\n').map(num => num.trim()).filter(num => num);
+    const cost = phoneNumbers.length * COSTS.SEND_MESSAGE;
+    const canAfford = await deductPoints(req.user._id, cost);
+    if (!canAfford) {
+        return res.status(402).json({ error: `Insufficient points to send ${phoneNumbers.length} messages. Required: ${cost}` });
+    }
+    // --- End Point Check ---
+
     try {
-        const phoneNumbers = numbers.split('\n').map(num => num.trim()).filter(num => num);
         const results = [];
 
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -794,6 +861,13 @@ setInterval(cleanupStaleAuthStates, 60 * 60 * 1000);
 // Add endpoint to get contacts
 app.post('/api/get-contacts', auth, async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
+    // --- Point Check ---
+    const cost = COSTS.FETCH_CONTACTS;
+    const canAfford = await deductPoints(req.user._id, cost);
+    if (!canAfford) {
+        return res.status(402).json({ error: 'Insufficient points to fetch contacts.' });
+    }
+    // --- End Point Check ---
     const { sessionId, source, options } = req.body;
     console.log(`Getting ${source} for session: ${sessionId}`);
 
@@ -894,6 +968,13 @@ app.post('/api/get-contacts', auth, async (req, res) => {
 // Add endpoint to get group members
 app.post('/api/get-group-members', auth, async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
+    // --- Point Check ---
+    const cost = COSTS.FETCH_GROUP_MEMBERS;
+    const canAfford = await deductPoints(req.user._id, cost);
+    if (!canAfford) {
+        return res.status(402).json({ error: 'Insufficient points to fetch group members.' });
+    }
+    // --- End Point Check ---
     const { sessionId, groupId } = req.body;
     console.log(`Getting members for group: ${groupId} in session: ${sessionId}`);
 
@@ -951,6 +1032,13 @@ app.get('/api/auto-reply-rules', auth, async (req, res) => {
 
 app.post('/api/auto-reply-rules', auth, async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
+    // --- Point Check ---
+    const cost = COSTS.CREATE_AUTO_REPLY_RULE;
+    const canAfford = await deductPoints(req.user._id, cost);
+    if (!canAfford) {
+        return res.status(402).json({ error: 'Insufficient points to create an auto-reply rule.' });
+    }
+    // --- End Point Check ---
     try {
         const {
             sessionId,

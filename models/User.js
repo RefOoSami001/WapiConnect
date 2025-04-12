@@ -27,6 +27,11 @@ const userSchema = new mongoose.Schema({
     profilePictureUrl: { // Add field for profile picture URL
         type: String
     },
+    pointsBalance: { // Add field for points balance
+        type: Number,
+        required: true,
+        default: 50 // Default points for new users
+    },
     createdAt: {
         type: Date,
         default: Date.now
