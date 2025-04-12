@@ -18,9 +18,14 @@ const { Server } = require('socket.io');
 const { useMongoDBAuthState } = require('mongo-baileys');
 const dotenv = require('dotenv');
 const rateLimit = require('express-rate-limit');
+const passport = require('passport');
+const session = require('express-session');
 const Session = require('./models/Session');
 const { router: authRouter, auth } = require('./routes/auth');
 const AutoReplyRule = require('./models/AutoReplyRule');
+
+// Passport config (Import after User model is potentially defined)
+require('./config/passport')(passport);
 
 // Set the MongoDB URI from environment variables
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -38,6 +43,23 @@ if (!process.env.JWT_SECRET) {
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
+
+// Express Session Middleware (Needed for passport flash messages during redirect)
+// Even though we use JWT for API auth, Google OAuth redirects rely on brief session/flash state.
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || 'keyboard cat', // Use an env var for session secret
+        resave: false,
+        saveUninitialized: false,
+        // Configure secure cookie in production (requires HTTPS)
+        // cookie: { secure: process.env.NODE_ENV === 'production' }
+    })
+);
+
+// Passport Middleware
+app.use(passport.initialize());
+// We are not using passport.session() because we use JWT for ongoing auth,
+// but initialize() is still needed for the strategy to work.
 
 // Increase body parser limit for handling large image payloads
 app.use(express.json({ limit: '50mb' }));
@@ -402,19 +424,22 @@ async function createSession(sessionId, userId) {
                         // If we get here, we should send a reply
                         try {
                             const jid = message.key.remoteJid;
-                            console.log(`Sending auto-reply for rule: ${rule.name} to ${jid}`);
+                            console.log(`Sending auto-reply for rule: ${rule.name} to ${jid} (replying to message)`);
+
+                            // Define options object to include the quoted message
+                            const replyOptions = { quoted: message };
 
                             // Send the appropriate response
                             if (rule.responseType === 'text') {
-                                await sock.sendMessage(jid, { text: rule.responseContent });
+                                await sock.sendMessage(jid, { text: rule.responseContent }, replyOptions);
                             } else if (rule.responseType === 'image' && rule.imageUrl) {
                                 await sock.sendMessage(jid, {
                                     image: { url: rule.imageUrl },
                                     caption: rule.responseContent
-                                });
+                                }, replyOptions);
                             } else if (rule.responseType === 'template') {
                                 // Handle template messages if needed
-                                await sock.sendMessage(jid, { text: rule.responseContent });
+                                await sock.sendMessage(jid, { text: rule.responseContent }, replyOptions);
                             }
 
                             console.log(`Auto-reply sent successfully for rule: ${rule.name}`);
@@ -471,6 +496,9 @@ async function createSession(sessionId, userId) {
 
 // API endpoints
 app.post('/api/create-session', auth, async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Authentication required.' });
+    }
     const sessionId = Date.now().toString();
     await createSession(sessionId, req.user._id);
     res.json({ sessionId });
@@ -478,6 +506,7 @@ app.post('/api/create-session', auth, async (req, res) => {
 
 // Add endpoint to check existing sessions
 app.get('/api/check-sessions', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     console.log('Checking for existing sessions via API...');
     try {
         const existingSessions = await Session.find({ userId: req.user._id });
@@ -498,6 +527,7 @@ app.get('/api/check-sessions', auth, async (req, res) => {
 
 // Add endpoint to get session statuses
 app.get('/api/session-statuses', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     console.log('Getting session statuses...');
     try {
         const sessionStatuses = {};
@@ -533,6 +563,7 @@ app.get('/api/session-statuses', auth, async (req, res) => {
 
 // Add endpoint to delete a session
 app.delete('/api/delete-session/:sessionId', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     const sessionId = req.params.sessionId;
     console.log(`Deleting session: ${sessionId}`);
 
@@ -591,6 +622,7 @@ const validatePhoneNumber = (req, res, next) => {
 
 // Add endpoint to send message
 app.post('/api/send-message', auth, validatePhoneNumber, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     const { sessionId, numbers, message, imageData } = req.body;
     console.log('Received message request:', { sessionId, numbers, message, hasImage: !!imageData });
 
@@ -761,6 +793,7 @@ setInterval(cleanupStaleAuthStates, 60 * 60 * 1000);
 
 // Add endpoint to get contacts
 app.post('/api/get-contacts', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     const { sessionId, source, options } = req.body;
     console.log(`Getting ${source} for session: ${sessionId}`);
 
@@ -860,6 +893,7 @@ app.post('/api/get-contacts', auth, async (req, res) => {
 
 // Add endpoint to get group members
 app.post('/api/get-group-members', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     const { sessionId, groupId } = req.body;
     console.log(`Getting members for group: ${groupId} in session: ${sessionId}`);
 
@@ -905,6 +939,7 @@ app.post('/api/get-group-members', auth, async (req, res) => {
 
 // Auto-reply rules API endpoints
 app.get('/api/auto-reply-rules', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     try {
         const rules = await AutoReplyRule.find({ userId: req.user._id });
         res.json({ rules });
@@ -915,6 +950,7 @@ app.get('/api/auto-reply-rules', auth, async (req, res) => {
 });
 
 app.post('/api/auto-reply-rules', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     try {
         const {
             sessionId,
@@ -954,6 +990,7 @@ app.post('/api/auto-reply-rules', auth, async (req, res) => {
 });
 
 app.put('/api/auto-reply-rules/:ruleId', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     try {
         const { ruleId } = req.params;
         const updateData = req.body;
@@ -979,6 +1016,7 @@ app.put('/api/auto-reply-rules/:ruleId', auth, async (req, res) => {
 });
 
 app.delete('/api/auto-reply-rules/:ruleId', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     try {
         const { ruleId } = req.params;
 
@@ -995,6 +1033,7 @@ app.delete('/api/auto-reply-rules/:ruleId', auth, async (req, res) => {
 });
 
 app.post('/api/auto-reply-rules/:ruleId/toggle', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     try {
         const { ruleId } = req.params;
 
@@ -1015,6 +1054,7 @@ app.post('/api/auto-reply-rules/:ruleId/toggle', auth, async (req, res) => {
 
 // Add endpoint to cancel a pending session
 app.delete('/api/cancel-pending-session/:sessionId', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     const sessionId = req.params.sessionId;
     const userId = req.user._id;
     console.log(`[${userId}] Cancellation request for pending session: ${sessionId}`);

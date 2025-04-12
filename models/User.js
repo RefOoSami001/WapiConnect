@@ -1,7 +1,13 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+// Remove bcrypt require as it's no longer needed for passwords
+// const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
+    googleId: { // Add googleId field
+        type: String,
+        unique: true,
+        sparse: true // Allows multiple null values but ensures uniqueness for actual googleIds
+    },
     email: {
         type: String,
         required: true,
@@ -11,22 +17,14 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: function () {
-            // Password is only required for local accounts, not Google accounts
-            return !this.googleId;
-        }
+        required: false // Make password optional
     },
     name: {
         type: String,
         required: true,
         trim: true
     },
-    googleId: {
-        type: String,
-        sparse: true,
-        unique: true
-    },
-    picture: {
+    profilePictureUrl: { // Add field for profile picture URL
         type: String
     },
     createdAt: {
@@ -39,23 +37,22 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-// Hash password before saving
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password') || !this.password) return next();
+// Remove password hashing logic
+// userSchema.pre('save', async function (next) {
+//     if (!this.isModified('password')) return next();
+//
+//     try {
+//         const salt = await bcrypt.genSalt(10);
+//         this.password = await bcrypt.hash(this.password, salt);
+//         next();
+//     } catch (error) {
+//         next(error);
+//     }
+// });
 
-    try {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
-        next();
-    } catch (error) {
-        next(error);
-    }
-});
-
-// Method to compare passwords
-userSchema.methods.comparePassword = async function (candidatePassword) {
-    if (!this.password) return false;
-    return bcrypt.compare(candidatePassword, this.password);
-};
+// Remove password comparison method
+// userSchema.methods.comparePassword = async function (candidatePassword) {
+//     return bcrypt.compare(candidatePassword, this.password);
+// };
 
 module.exports = mongoose.model('User', userSchema); 

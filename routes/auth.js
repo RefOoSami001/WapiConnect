@@ -1,183 +1,78 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const passport = require('passport');
 const User = require('../models/User');
-const { OAuth2Client } = require('google-auth-library');
-
-// Initialize Google OAuth client
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Middleware to verify JWT token
 const auth = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         if (!token) {
-            throw new Error();
+            throw new Error('No token provided');
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(decoded.userId);
 
         if (!user) {
-            throw new Error();
+            throw new Error('User not found');
         }
 
         req.user = user;
         req.token = token;
         next();
     } catch (error) {
+        console.error('Auth middleware error:', error.message);
         res.status(401).json({ error: 'Please authenticate.' });
     }
 };
 
-// Google Authentication route
-router.post('/google', async (req, res) => {
-    try {
-        const { token } = req.body;
+// Remove Signup route
+// router.post('/signup', ...);
 
-        // Verify Google token
-        const ticket = await googleClient.verifyIdToken({
-            idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID
-        });
+// Remove Login route
+// router.post('/login', ...);
 
-        const payload = ticket.getPayload();
+// --- Google OAuth Routes ---
 
-        // Extract user data from Google payload
-        const { sub: googleId, email, name, picture } = payload;
+// 1. Route to start the Google OAuth flow
+// User clicks 'Login with Google' -> redirects to Google's consent screen
+router.get('/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+);
 
-        // Check if user exists
-        let user = await User.findOne({ googleId });
+// 2. Google OAuth Callback Route
+// After user grants permission, Google redirects back here
+router.get('/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login.html?error=google_auth_failed', session: false }),
+    async (req, res) => {
+        console.log('Google callback successful, user:', req.user.email);
 
-        if (!user) {
-            // Check if email already exists
-            const emailUser = await User.findOne({ email });
+        try {
+            req.user.lastLogin = new Date();
+            await req.user.save();
 
-            if (emailUser) {
-                // Link Google account to existing email account
-                emailUser.googleId = googleId;
-                emailUser.picture = picture;
-                await emailUser.save();
-                user = emailUser;
-            } else {
-                // Create new user
-                user = new User({
-                    email,
-                    name,
-                    googleId,
-                    picture
-                });
-                await user.save();
-            }
+            const payload = { userId: req.user._id };
+            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+            const userData = JSON.stringify({
+                id: req.user._id,
+                email: req.user.email,
+                name: req.user.name,
+                profilePictureUrl: req.user.profilePictureUrl
+            });
+
+            res.redirect(`/dashboard.html?token=${token}&user=${encodeURIComponent(userData)}`);
+
+        } catch (error) {
+            console.error('Error during Google callback processing:', error);
+            res.redirect('/login.html?error=callback_processing_failed');
         }
-
-        // Update last login
-        user.lastLogin = new Date();
-        await user.save();
-
-        // Generate JWT token
-        const jwtToken = jwt.sign(
-            { userId: user._id },
-            process.env.JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-
-        res.status(200).json({
-            token: jwtToken,
-            user: {
-                id: user._id,
-                email: user.email,
-                name: user.name,
-                picture: user.picture
-            }
-        });
-    } catch (error) {
-        console.error('Google auth error:', error);
-        res.status(401).json({ error: 'Invalid Google token' });
     }
-});
+);
 
-// Signup route
-router.post('/signup', async (req, res) => {
-    try {
-        const { email, password, name } = req.body;
-
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ error: 'Email already registered' });
-        }
-
-        // Create new user
-        const user = new User({
-            email,
-            password,
-            name
-        });
-
-        await user.save();
-
-        // Generate JWT token
-        const token = jwt.sign(
-            { userId: user._id },
-            process.env.JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-
-        res.status(201).json({
-            token,
-            user: {
-                id: user._id,
-                email: user.email,
-                name: user.name
-            }
-        });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
-// Login route
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        // Find user
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        // Check password
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        // Update last login
-        user.lastLogin = new Date();
-        await user.save();
-
-        // Generate JWT token
-        const token = jwt.sign(
-            { userId: user._id },
-            process.env.JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-
-        res.json({
-            token,
-            user: {
-                id: user._id,
-                email: user.email,
-                name: user.name,
-                picture: user.picture
-            }
-        });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
+// --- End Google OAuth Routes ---
 
 // Get current user route
 router.get('/me', auth, async (req, res) => {
@@ -185,10 +80,15 @@ router.get('/me', auth, async (req, res) => {
         user: {
             id: req.user._id,
             email: req.user.email,
-            name: req.user.name,
-            picture: req.user.picture
+            name: req.user.name
         }
     });
 });
+
+// Optional: Logout route if using sessions (we are using JWT, so client just deletes token)
+// router.get('/logout', (req, res) => {
+//     req.logout();
+//     res.redirect('/');
+// });
 
 module.exports = { router, auth }; 

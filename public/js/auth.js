@@ -19,7 +19,8 @@ function getCurrentUser() {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = 'login.html';
+    // Redirect to the new login page (or home page)
+    window.location.href = 'login.html'; // Or perhaps '/' if login.html is the root
 }
 
 // Add auth header to fetch requests
@@ -34,62 +35,26 @@ function addAuthHeader(headers = {}) {
     return headers;
 }
 
-// Redirect to login if not authenticated
+// Redirect to login if not authenticated (for protected pages)
 function requireAuth() {
     if (!isAuthenticated()) {
         window.location.href = 'login.html';
     }
 }
 
-// Update user avatar based on profile data
-function updateUserAvatar() {
-    const user = getCurrentUser();
-    if (user && user.picture) {
-        // User has a profile picture (from Google)
-        const avatarImage = document.getElementById('user-avatar-image');
-        const avatarLetter = document.getElementById('user-avatar-letter');
-        const avatarContainer = document.getElementById('user-avatar-container');
-
-        if (avatarImage && avatarLetter && avatarContainer) {
-            avatarImage.src = user.picture;
-            avatarImage.classList.remove('d-none');
-            avatarLetter.classList.add('d-none');
-        }
-    } else if (user && user.name) {
-        // User doesn't have a picture, display first letter
-        const avatarLetter = document.getElementById('user-avatar-letter');
-        if (avatarLetter) {
-            avatarLetter.textContent = user.name.charAt(0).toUpperCase();
-        }
-    }
-}
-
-// Check authentication on page load
-document.addEventListener('DOMContentLoaded', () => {
-    // If on login or signup page and already authenticated, redirect to dashboard
-    if ((window.location.pathname.includes('login.html') ||
-        window.location.pathname.includes('signup.html')) &&
-        isAuthenticated()) {
-        window.location.href = 'dashboard.html';
-    }
-
-    // If on protected page and not authenticated, redirect to login
-    if (window.location.pathname.includes('dashboard.html') && !isAuthenticated()) {
-        window.location.href = 'login.html';
-    }
-
-    // If on dashboard, display user info
-    if (window.location.pathname.includes('dashboard.html') && isAuthenticated()) {
-        const user = getCurrentUser();
-        if (user) {
-            // Update user name display
-            const userNameElement = document.getElementById('user-name');
-            if (userNameElement) {
-                userNameElement.textContent = user.name;
-            }
-
-            // Update avatar
-            updateUserAvatar();
-        }
-    }
-}); 
+// Remove the DOMContentLoaded listener that handles redirects on login/signup pages
+// The login page now handles its own logic for checking URL params and existing tokens.
+// document.addEventListener('DOMContentLoaded', () => {
+// // If on login or signup page and already authenticated, redirect to dashboard
+// if ((window.location.pathname.includes('login.html') ||
+//     window.location.pathname.includes('signup.html')) &&
+//     isAuthenticated()) {
+//     window.location.href = 'dashboard.html';
+// }
+//
+// // If on protected page and not authenticated, redirect to login
+// // This check should be done on the protected page itself (e.g., dashboard.html)
+// if (window.location.pathname.includes('dashboard.html') && !isAuthenticated()) {
+//     window.location.href = 'login.html';
+// }
+// }); 

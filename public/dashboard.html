@@ -23,21 +23,10 @@
             font-weight: 600;
             font-size: 1.1rem;
             transition: transform 0.3s ease;
-            position: relative;
-            overflow: hidden;
         }
 
         .user-avatar:hover {
             transform: scale(1.05);
-        }
-
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
         }
 
         .user-info {
@@ -77,9 +66,11 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle user-profile" href="#" id="userDropdown" role="button"
                             data-bs-toggle="dropdown">
-                            <div class="user-avatar" id="user-avatar-container">
+                            <!-- Image avatar (initially hidden) -->
+                            <img src="" alt="User Avatar" id="user-avatar-image" class="user-avatar d-none">
+                            <!-- Text avatar (fallback) -->
+                            <div class="user-avatar" id="user-avatar-initials">
                                 <span id="user-avatar-letter">U</span>
-                                <img id="user-avatar-image" class="d-none" src="" alt="User Profile">
                             </div>
                             <div class="user-info">
                                 <span class="user-name" id="user-name">User</span>
@@ -481,6 +472,14 @@
                                     </div>
                                 </div>
 
+                                <div class="form-row" id="rule-image-url-group" style="display:none;">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Image URL</label>
+                                        <input type="text" class="parameter-input" id="rule-image-url"
+                                            placeholder="Enter image URL (required for image response)">
+                                    </div>
+                                </div>
+
                                 <button class="action-button" onclick="runApiRequest('create-auto-reply')">
                                     <i class="bi bi-plus-circle me-2"></i>Create Rule
                                 </button>
@@ -635,23 +634,71 @@ https://zynchat.koyeb.app/api/check-sessions \
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/auth.js"></script>
     <script>
+        // --- Handle potential token from redirect FIRST ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        const userParamFromUrl = urlParams.get('user');
+
+        if (tokenFromUrl && userParamFromUrl) {
+            try {
+                const userFromUrl = JSON.parse(decodeURIComponent(userParamFromUrl));
+                console.log('Token and user found in URL, saving to localStorage...');
+                localStorage.setItem('token', tokenFromUrl);
+                localStorage.setItem('user', JSON.stringify(userFromUrl));
+                // Clean the URL now that data is stored (removes token/user from address bar)
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (e) {
+                console.error("Error processing token/user from URL:", e);
+                // Clear potentially bad data and redirect to login with an error
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html?error=auth_processing_error';
+            }
+        }
+        // --- End URL Handling ---
+
+        // Now check authentication (it should find the token in localStorage if it was just set)
+        requireAuth();
+
         // Check authentication on page load
         document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = '/login.html';
-                return;
-            }
+            // Token check is now handled by requireAuth() above
+            // We still need to display user info if authenticated
+            const token = localStorage.getItem('token'); // Read the token again for display
+            if (!token) return; // Should have been redirected by requireAuth, but double check
 
             // Display user information
             const user = JSON.parse(localStorage.getItem('user'));
             if (user) {
                 document.getElementById('user-name').textContent = user.name;
-                document.getElementById('user-avatar-letter').textContent = user.name.charAt(0).toUpperCase();
+
+                const imgAvatar = document.getElementById('user-avatar-image');
+                const initialsAvatar = document.getElementById('user-avatar-initials');
+                const initialsLetter = document.getElementById('user-avatar-letter');
+
+                if (user.profilePictureUrl) {
+                    // Use Google profile picture
+                    imgAvatar.src = user.profilePictureUrl;
+                    imgAvatar.classList.remove('d-none');
+                    initialsAvatar.classList.add('d-none');
+                } else {
+                    // Use initials fallback
+                    initialsLetter.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                    imgAvatar.classList.add('d-none');
+                    initialsAvatar.classList.remove('d-none');
+                }
+
+                // Display API token (ensure the element exists)
+                const tokenDisplayElement = document.getElementById('api-token-display-new');
+                if (tokenDisplayElement) {
+                    tokenDisplayElement.querySelector('.token-content').textContent = token;
+                } else {
+                    console.warn('API token display element not found.');
+                }
             }
 
-            // Display API token
-            document.getElementById('api-token-display-new').querySelector('.token-content').textContent = token;
+            // Initialize Bootstrap components after DOM is ready
+            initializeBootstrapComponents();
         });
 
         // Function to add auth header to requests
@@ -1242,6 +1289,16 @@ https://zynchat.koyeb.app/api/check-sessions \
                 }
             }
 
+            // Add listener for Auto-Reply Response Type change
+            const ruleResponseTypeSelect = document.getElementById('response-type');
+            if (ruleResponseTypeSelect) {
+                handleRuleResponseTypeChange(); // Initial check
+                ruleResponseTypeSelect.addEventListener('change', () => {
+                    handleRuleResponseTypeChange();
+                    updateCurlCommand(); // Update curl when type changes
+                });
+            }
+
             // Add style for transition to all parameter group elements
             document.querySelectorAll('.parameter-group').forEach(group => {
                 group.style.transition = 'opacity 0.3s, transform 0.3s';
@@ -1293,18 +1350,16 @@ https://zynchat.koyeb.app/api/check-sessions \\
                     break;
 
                 case '#messaging-section':
-                    const sendSessionId = document.getElementById('send-session-id').value || 'SESSION_ID';
-                    const numbers = document.getElementById('send-numbers').value || '+1234567890';
-                    const message = document.getElementById('send-message').value || 'Hello';
+                    const sendSessionId = document.getElementById('send-session-id').value;
+                    const numbers = document.getElementById('send-numbers').value;
+                    const message = document.getElementById('send-message').value;
                     const imageType = document.getElementById('image-type').value;
 
                     let imageData = null;
                     if (imageType === 'url') {
-                        const url = document.getElementById('image-url').value || 'https://example.com/image.jpg';
-                        imageData = { url: url };
+                        imageData = { url: document.getElementById('image-url').value };
                     } else if (imageType === 'base64') {
-                        const base64 = document.getElementById('image-base64').value || 'BASE64_DATA';
-                        imageData = base64;
+                        imageData = document.getElementById('image-base64').value;
                     }
 
                     const messagePayload = {
@@ -1323,41 +1378,21 @@ https://zynchat.koyeb.app/api/send-message \\
 
                 case '#contacts-section':
                     // Check which form field is filled to determine the command
-                    const contactsSessionId = document.getElementById('contacts-session-id').value || 'SESSION_ID';
-                    const source = document.getElementById('contacts-source').value || 'contacts';
+                    const contactsSessionId = document.getElementById('contacts-session-id').value;
+                    const source = document.getElementById('contacts-source').value;
 
-                    if (document.getElementById('group-id') && document.getElementById('group-id').value) {
-                        const groupSessionId = document.getElementById('group-session-id').value || 'SESSION_ID';
-                        const groupId = document.getElementById('group-id').value || 'GROUP_ID';
-
-                        const groupPayload = {
-                            sessionId: groupSessionId,
-                            groupId: groupId
-                        };
-
-                        curlCommand = `curl -X POST \\
-https://zynchat.koyeb.app/api/get-group-members \\
--H 'Authorization: Bearer ${token}' \\
--H 'Content-Type: application/json' \\
--d '${JSON.stringify(groupPayload, null, 2)}'`;
-                    } else {
-                        const contactsPayload = {
-                            sessionId: contactsSessionId,
-                            source: source,
-                            options: {
-                                includeName: true,
-                                includeStatus: true,
-                                includeGroupName: true,
-                                includeAdmin: true
-                            }
-                        };
-
-                        curlCommand = `curl -X POST \\
-https://zynchat.koyeb.app/api/get-contacts \\
--H 'Authorization: Bearer ${token}' \\
--H 'Content-Type: application/json' \\
--d '${JSON.stringify(contactsPayload, null, 2)}'`;
-                    }
+                    method = 'POST';
+                    endpoint = '/api/get-contacts';
+                    body = {
+                        sessionId: contactsSessionId,
+                        source: source,
+                        options: {
+                            includeName: true,
+                            includeStatus: true,
+                            includeGroupName: true,
+                            includeAdmin: true
+                        }
+                    };
                     break;
 
                 case '#auto-reply-section':
@@ -1370,6 +1405,7 @@ https://zynchat.koyeb.app/api/get-contacts \\
                         const triggerValue = document.getElementById('trigger-value').value || 'keyword';
                         const responseType = document.getElementById('response-type').value || 'text';
                         const responseContent = document.getElementById('response-content').value || 'Response message';
+                        const imageUrl = responseType === 'image' ? (document.getElementById('rule-image-url').value || 'https://i.postimg.cc/J0bz7nCv/logo.png') : null;
 
                         const rulePayload = {
                             name: ruleName,
@@ -1378,7 +1414,7 @@ https://zynchat.koyeb.app/api/get-contacts \\
                             triggerValue: triggerValue,
                             responseType: responseType,
                             responseContent: responseContent,
-                            imageUrl: null,
+                            imageUrl: imageUrl,
                             conditions: {
                                 timeRestricted: false,
                                 startTime: null,
@@ -1511,6 +1547,7 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
                     const triggerValue = document.getElementById('trigger-value').value;
                     const responseType = document.getElementById('response-type').value;
                     const responseContent = document.getElementById('response-content').value;
+                    const imageUrl = responseType === 'image' ? document.getElementById('rule-image-url').value : null;
 
                     method = 'POST';
                     endpoint = '/api/auto-reply-rules';
@@ -1521,7 +1558,7 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
                         triggerValue,
                         responseType,
                         responseContent,
-                        imageUrl: null,
+                        imageUrl: imageUrl,
                         conditions: {
                             timeRestricted: false,
                             startTime: null,
@@ -1634,6 +1671,23 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
                 .replace(/\b(function|const|let|var|return|if|else|for|while)\b/g, '<span class="keyword">$1</span>')
                 .replace(/\b(GET|POST|PUT|DELETE)\b/g, '<span class="method">$1</span>');
         }
+
+        // Function to handle auto-reply response type changes (show/hide image URL)
+        function handleRuleResponseTypeChange() {
+            const responseTypeSelect = document.getElementById('response-type');
+            const imageUrlGroup = document.getElementById('rule-image-url-group');
+
+            if (!responseTypeSelect || !imageUrlGroup) return;
+
+            if (responseTypeSelect.value === 'image') {
+                imageUrlGroup.style.display = 'block';
+                setTimeout(() => { imageUrlGroup.style.opacity = '1'; }, 50); // Fade in
+            } else {
+                imageUrlGroup.style.opacity = '0';
+                setTimeout(() => { imageUrlGroup.style.display = 'none'; }, 200); // Fade out
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const sidebar = document.querySelector('.api-sidebar');
             const sidebarHeader = document.querySelector('.sidebar-header');
