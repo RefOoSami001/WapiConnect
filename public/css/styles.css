@@ -2788,6 +2788,7 @@ textarea:focus {
 }
 
 @media (max-width: 992px) {
+    
     .api-container {
         grid-template-columns: var(--sidebar-width) 1fr;
         grid-template-rows: auto auto;
@@ -2817,6 +2818,9 @@ textarea:focus {
 }
 
 @media (max-width: 768px) {
+    .sidebar-header i {
+        display: none;
+    }
     :root {
         --sidebar-width: 180px;
     }
@@ -2867,6 +2871,9 @@ textarea:focus {
 }
 
 @media (max-width: 576px) {
+    .sidebar-header i {
+        display: none;
+    }
     .api-container {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
@@ -4866,4 +4873,25 @@ textarea.form-control {
     body.menu-open {
         overflow: hidden;
     }
+}
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.navbar-brand img {
+    height: 40px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand img:hover {
+    transform: scale(1.05);
+}
+
+.navbar-brand span {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    --webkit-background-clip: text;
+    --webkit-text-fill-color: transparent;
 }
