@@ -721,6 +721,7 @@ https://wapiconnect.koyeb.app/api/check-sessions \
 
         // Session management
         let currentSessionId = null;
+        let isSessionConnected = false;
         const createSessionModal = new bootstrap.Modal(document.getElementById('create-session-modal'));
 
         // Mobile menu functionality
@@ -822,13 +823,20 @@ https://wapiconnect.koyeb.app/api/check-sessions \
 
                 if (response.ok) {
                     currentSessionId = data.sessionId;
+                    isSessionConnected = false;
                     createSessionModal.show();
+
+                    // Reset modal state
+                    document.getElementById('qr-code-container').classList.add('d-none');
+                    document.getElementById('session-status').classList.add('d-none');
+                    document.getElementById('qr-code').src = '';
 
                     // Listen for QR code
                     socket.on(`qr-${currentSessionId}`, (qrCode) => {
                         document.getElementById('qr-code').src = qrCode;
                         document.getElementById('qr-code-container').classList.remove('d-none');
                         document.getElementById('qr-code').classList.add('qr-animation');
+                        document.getElementById('session-status').classList.add('d-none');
                     });
 
                     // Listen for session status
@@ -841,20 +849,67 @@ https://wapiconnect.koyeb.app/api/check-sessions \
                             </div>
                         `;
                         statusElement.classList.remove('d-none');
+                        document.getElementById('qr-code-container').classList.add('d-none');
 
                         if (status === 'connected') {
+                            isSessionConnected = true;
                             setTimeout(() => {
                                 createSessionModal.hide();
                                 loadSessions();
                                 showToast('Session connected successfully!', 'success');
                             }, 2000);
+                        } else if (status === 'disconnected') {
+                            showToast('Session failed to connect or disconnected.', 'warning');
+                            setTimeout(() => {
+                                createSessionModal.hide();
+                            }, 2000);
                         }
                     });
+                } else {
+                    const errorData = await response.json();
+                    showToast(`Error creating session: ${errorData.error || response.statusText}`, 'danger');
                 }
             } catch (error) {
                 console.error('Error creating session:', error);
                 showToast('Error creating session', 'danger');
             }
+        });
+
+        // Add event listener for modal hidden event
+        document.getElementById('create-session-modal').addEventListener('hidden.bs.modal', async () => {
+            console.log('Modal hidden. Session ID:', currentSessionId, 'Connected:', isSessionConnected);
+            if (currentSessionId && !isSessionConnected) {
+                console.log(`Modal closed for session ${currentSessionId} before connection. Cancelling...`);
+                try {
+                    const response = await fetch(`/api/cancel-pending-session/${currentSessionId}`, {
+                        method: 'DELETE',
+                        headers: addAuthHeader()
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        console.log(`Session ${currentSessionId} cancellation request successful.`);
+                        showToast('Session creation cancelled.', 'info');
+                    } else {
+                        console.warn(`Failed to cancel session ${currentSessionId}:`, data.error || response.statusText);
+                        if (response.status !== 404 && response.status !== 409) {
+                            showToast(`Failed to cancel session: ${data.error || 'Unknown error'}`, 'warning');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error sending session cancellation request:', error);
+                    showToast('Error cancelling session', 'danger');
+                }
+            }
+
+            if (currentSessionId) {
+                socket.off(`qr-${currentSessionId}`);
+                socket.off(`session-${currentSessionId}-status`);
+            }
+            currentSessionId = null;
+            isSessionConnected = false;
+            document.getElementById('qr-code').src = '';
+            document.getElementById('qr-code-container').classList.add('d-none');
+            document.getElementById('session-status').classList.add('d-none');
         });
 
         // Load sessions

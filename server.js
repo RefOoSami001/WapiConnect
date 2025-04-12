@@ -1013,6 +1013,104 @@ app.post('/api/auto-reply-rules/:ruleId/toggle', auth, async (req, res) => {
     }
 });
 
+// Add endpoint to cancel a pending session
+app.delete('/api/cancel-pending-session/:sessionId', auth, async (req, res) => {
+    const sessionId = req.params.sessionId;
+    const userId = req.user._id;
+    console.log(`[${userId}] Cancellation request for pending session: ${sessionId}`);
+
+    try {
+        // 1. Check session in memory
+        const sessionInMemory = sessions.get(sessionId);
+
+        if (sessionInMemory) {
+            // 2. Verify ownership
+            if (sessionInMemory.userId.toString() !== userId.toString()) {
+                console.warn(`[${userId}] Attempted to cancel session ${sessionId} not owned by user.`);
+                return res.status(403).json({ error: 'Forbidden: You do not own this session.' });
+            }
+
+            // 3. Check status in DB - only cancel if 'connecting'
+            const sessionInDb = await Session.findOne({ sessionId, userId });
+            if (sessionInDb && sessionInDb.status !== 'connecting') {
+                console.log(`[${userId}] Session ${sessionId} is no longer in 'connecting' state (current: ${sessionInDb.status}). No action taken.`);
+                // Send a success-like response as the goal (no pending session) is achieved.
+                // Or potentially 409 Conflict, but 200 might be simpler for the frontend.
+                return res.status(200).json({ success: true, message: `Session is already ${sessionInDb.status}.` });
+            }
+
+            console.log(`[${userId}] Proceeding with cancellation for session ${sessionId}`);
+
+            // 4. Clean up Baileys connection
+            if (sessionInMemory.sock) {
+                try {
+                    console.log(`[${userId}] Ending socket connection for ${sessionId}`);
+                    // Using logout might be more forceful if end doesn't work reliably
+                    if (typeof sessionInMemory.sock.logout === 'function') {
+                        await sessionInMemory.sock.logout();
+                    } else if (typeof sessionInMemory.sock.end === 'function') {
+                        sessionInMemory.sock.end();
+                    }
+
+                    console.log(`[${userId}] Removing listeners for ${sessionId}`);
+                    if (typeof sessionInMemory.sock.removeAllListeners === 'function') {
+                        sessionInMemory.sock.removeAllListeners();
+                    } else if (sessionInMemory.sock.ev && typeof sessionInMemory.sock.ev.removeAllListeners === 'function') {
+                        sessionInMemory.sock.ev.removeAllListeners();
+                    }
+                } catch (cleanupError) {
+                    console.error(`[${userId}] Error during socket cleanup for session ${sessionId}:`, cleanupError);
+                    // Continue cleanup despite socket errors
+                }
+            }
+
+            // 5. Remove from memory
+            sessions.delete(sessionId);
+            console.log(`[${userId}] Session ${sessionId} removed from memory.`);
+
+            // 6. Delete from DB
+            await Session.findOneAndDelete({ sessionId, userId });
+            console.log(`[${userId}] Session ${sessionId} deleted from database.`);
+
+            // 7. Drop auth collection
+            try {
+                const authCollectionName = `authState_${sessionId}`;
+                await mongoose.connection.db.dropCollection(authCollectionName);
+                console.log(`[${userId}] Dropped auth collection: ${authCollectionName}`);
+            } catch (dropError) {
+                // Ignore error if collection doesn't exist (e.g., cleanup race condition)
+                if (dropError.message.includes('ns not found')) {
+                    console.log(`[${userId}] Auth collection for ${sessionId} not found, likely already dropped.`);
+                } else {
+                    console.error(`[${userId}] Error dropping auth collection for session ${sessionId}:`, dropError);
+                }
+            }
+
+            res.json({ success: true, message: 'Pending session cancelled successfully.' });
+
+        } else {
+            // Session not found in memory. It might have already connected/disconnected or been cancelled.
+            // Check DB to be sure.
+            const sessionInDb = await Session.findOne({ sessionId, userId });
+            if (sessionInDb) {
+                console.log(`[${userId}] Session ${sessionId} not in memory, but found in DB with status ${sessionInDb.status}. Likely already processed or cleaned up.`);
+                // If it's still 'connecting' in DB but not memory, something is odd, but we can try DB cleanup.
+                if (sessionInDb.status === 'connecting') {
+                    await Session.findOneAndDelete({ sessionId, userId });
+                    console.log(`[${userId}] Deleted lingering 'connecting' session ${sessionId} from DB.`);
+                }
+                return res.status(200).json({ success: true, message: 'Session already processed or cleaned up.' });
+            } else {
+                console.log(`[${userId}] Session ${sessionId} not found in memory or DB.`);
+                return res.status(404).json({ error: 'Session not found or already cancelled.' });
+            }
+        }
+    } catch (error) {
+        console.error(`[${userId}] Error cancelling pending session ${sessionId}:`, error);
+        res.status(500).json({ error: 'Internal server error during session cancellation.' });
+    }
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
