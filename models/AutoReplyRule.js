@@ -21,7 +21,7 @@ const autoReplyRuleSchema = new mongoose.Schema({
     triggerType: {
         type: String,
         enum: ['keyword', 'regex', 'exact', 'contains'],
-        default: 'contains'
+        required: true
     },
     triggerValue: {
         type: String,
@@ -34,16 +34,10 @@ const autoReplyRuleSchema = new mongoose.Schema({
     },
     responseContent: {
         type: String,
-        required: function () { return this.responseType !== 'image'; }
+        required: true
     },
     imageUrl: {
-        type: String,
-        required: function () { return this.responseType === 'image'; }
-    },
-    reactionEmoji: {
-        type: String,
-        trim: true,
-        default: null
+        type: String
     },
     conditions: {
         timeRestricted: {
