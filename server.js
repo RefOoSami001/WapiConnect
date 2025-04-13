@@ -108,19 +108,22 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Trust proxy - necessary when behind reverse proxies like Render.com, Heroku, Koyeb, etc.
 app.set('trust proxy', 1); // Trust first proxy
 
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    keyGenerator: (req) => {
-        // Use the real IP address from the X-Forwarded-For header if available
-        return req.ip;
-    }
-});
+// but initialize() is still needed for the strategy to work.
 
-app.use(limiter);
+// Rate limiting
+// const limiter = rateLimit({
+//    windowMs: 15 * 60 * 1000, // 15 minutes
+//    max: 100, // limit each IP to 100 requests per windowMs
+//    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+//    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+//    keyGenerator: (req) => {
+//        // Use the real IP address from the X-Forwarded-For header if available
+//        return req.ip;
+//    }
+// });
+
+// app.use(limiter);
+
 app.use(express.static('public'));
 
 // Auth routes
