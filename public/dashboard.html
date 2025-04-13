@@ -1417,7 +1417,7 @@ https://zynchat.koyeb.app/api/check-sessions \
             switch (activeTabId) {
                 case '#auth-section':
                     curlCommand = `curl -X GET \\
-https://wapiconnect.koyeb.app/api/check-sessions \\
+https://zynchat.koyeb.app/api/check-sessions \\
 -H 'Authorization: Bearer ${token}'`;
                     break;
 
@@ -1425,12 +1425,12 @@ https://wapiconnect.koyeb.app/api/check-sessions \\
                     const deleteSessionId = getValue('delete-session-id', 'SESSION_ID');
                     if (document.getElementById('delete-session-id')?.value) { // Only show delete if ID is actually entered
                         curlCommand = `curl -X DELETE \\
-https://wapiconnect.koyeb.app/api/delete-session/${deleteSessionId} \\
+https://zynchat.koyeb.app/api/delete-session/${deleteSessionId} \\
 -H 'Authorization: Bearer ${token}'`;
                     } else {
                         // Default to check sessions if no delete ID is present
                         curlCommand = `curl -X GET \\
-https://wapiconnect.koyeb.app/api/check-sessions \\
+https://zynchat.koyeb.app/api/check-sessions \\
 -H 'Authorization: Bearer ${token}'`;
                     }
                     break;
@@ -1456,7 +1456,7 @@ https://wapiconnect.koyeb.app/api/check-sessions \\
                     };
 
                     curlCommand = `curl -X POST \\
-https://wapiconnect.koyeb.app/api/send-message \\
+https://zynchat.koyeb.app/api/send-message \\
 -H 'Authorization: Bearer ${token}' \\
 -H 'Content-Type: application/json' \\
 -d '${JSON.stringify(messagePayload, null, 2)}'`;
@@ -1476,7 +1476,7 @@ https://wapiconnect.koyeb.app/api/send-message \\
                             groupId: groupId
                         };
                         curlCommand = `curl -X POST \\
-https://wapiconnect.koyeb.app/api/get-group-members \\
+https://zynchat.koyeb.app/api/get-group-members \\
 -H 'Authorization: Bearer ${token}' \\
 -H 'Content-Type: application/json' \\
 -d '${JSON.stringify(groupPayload, null, 2)}'`;
@@ -1492,7 +1492,7 @@ https://wapiconnect.koyeb.app/api/get-group-members \\
                             }
                         };
                         curlCommand = `curl -X POST \\
-https://wapiconnect.koyeb.app/api/get-contacts \\
+https://zynchat.koyeb.app/api/get-contacts \\
 -H 'Authorization: Bearer ${token}' \\
 -H 'Content-Type: application/json' \\
 -d '${JSON.stringify(contactsPayload, null, 2)}'`;
@@ -1532,24 +1532,24 @@ https://wapiconnect.koyeb.app/api/get-contacts \\
                             }
                         };
                         curlCommand = `curl -X POST \\
-https://wapiconnect.koyeb.app/api/auto-reply-rules \\
+https://zynchat.koyeb.app/api/auto-reply-rules \\
 -H 'Authorization: Bearer ${token}' \\
 -H 'Content-Type: application/json' \\
 -d '${JSON.stringify(rulePayload, null, 2)}'`;
                     } else if (toggleRuleInput && toggleRuleInput.value) {
                         const toggleRuleId = getValue('toggle-rule-id', 'RULE_ID');
                         curlCommand = `curl -X POST \\
-https://wapiconnect.koyeb.app/api/auto-reply-rules/${toggleRuleId}/toggle \\
+https://zynchat.koyeb.app/api/auto-reply-rules/${toggleRuleId}/toggle \\
 -H 'Authorization: Bearer ${token}'`;
                     } else if (deleteRuleInput && deleteRuleInput.value) {
                         const deleteRuleId = getValue('delete-rule-id', 'RULE_ID');
                         curlCommand = `curl -X DELETE \\
-https://wapiconnect.koyeb.app/api/auto-reply-rules/${deleteRuleId} \\
+https://zynchat.koyeb.app/api/auto-reply-rules/${deleteRuleId} \\
 -H 'Authorization: Bearer ${token}'`;
                     } else {
                         // Default to list rules
                         curlCommand = `curl -X GET \\
-https://wapiconnect.koyeb.app/api/auto-reply-rules \\
+https://zynchat.koyeb.app/api/auto-reply-rules \\
 -H 'Authorization: Bearer ${token}'`;
                     }
                     break;
