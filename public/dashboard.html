@@ -706,52 +706,11 @@ https://zynchat.koyeb.app/api/check-sessions \
         // Now check authentication (it should find the token in localStorage if it was just set)
         requireAuth();
 
-        // Check authentication on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Token check is now handled by requireAuth() above
-            // We still need to display user info if authenticated
-            const token = localStorage.getItem('token'); // Read the token again for display
-            if (!token) return; // Should have been redirected by requireAuth, but double check
+        // Fetch latest user data on load to ensure points/info are up-to-date
+        fetchAndUpdateUserData();
 
-            // Display user information
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (user) {
-                document.getElementById('user-name').textContent = user.name;
-
-                // Display points balance
-                const pointsBalanceElement = document.getElementById('points-balance');
-                if (pointsBalanceElement) {
-                    pointsBalanceElement.textContent = user.pointsBalance !== undefined ? user.pointsBalance.toFixed(2) : 'N/A'; // Format points
-                }
-
-                const imgAvatar = document.getElementById('user-avatar-image');
-                const initialsAvatar = document.getElementById('user-avatar-initials');
-                const initialsLetter = document.getElementById('user-avatar-letter');
-
-                if (user.profilePictureUrl) {
-                    // Use Google profile picture
-                    imgAvatar.src = user.profilePictureUrl;
-                    imgAvatar.classList.remove('d-none');
-                    initialsAvatar.classList.add('d-none');
-                } else {
-                    // Use initials fallback
-                    initialsLetter.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
-                    imgAvatar.classList.add('d-none');
-                    initialsAvatar.classList.remove('d-none');
-                }
-
-                // Display API token (ensure the element exists)
-                const tokenDisplayElement = document.getElementById('api-token-display-new');
-                if (tokenDisplayElement) {
-                    tokenDisplayElement.querySelector('.token-content').textContent = token;
-                } else {
-                    console.warn('API token display element not found.');
-                }
-            }
-
-            // Initialize Bootstrap components after DOM is ready
-            initializeBootstrapComponents();
-        });
+        // Initialize Bootstrap components after DOM is ready
+        initializeBootstrapComponents();
 
         // Function to add auth header to requests
         function addAuthHeader() {
@@ -769,8 +728,81 @@ https://zynchat.koyeb.app/api/check-sessions \
             window.location.href = '/login.html';
         }
 
+        // --- NEW: Function to Fetch and Update User Data on Load ---
+        async function fetchAndUpdateUserData() {
+            console.log('Fetching latest user data...');
+            try {
+                const response = await fetch('/api/auth/me', {
+                    headers: addAuthHeader()
+                });
+                if (!response.ok) {
+                    // Handle auth errors, maybe redirect to login
+                    if (response.status === 401) {
+                        console.error('Auth error fetching user data, redirecting to login.');
+                        logout(); // Use logout to clear storage and redirect
+                        return;
+                    }
+                    throw new Error(`Failed to fetch user data: ${response.statusText}`);
+                }
+                const data = await response.json();
+                if (data.user) {
+                    console.log('User data received:', data.user);
+                    // Update localStorage with fresh data
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    // Update the UI
+                    updateUserInfoDisplay(data.user);
+                } else {
+                    console.error('User data not found in /api/auth/me response');
+                }
+            } catch (error) {
+                console.error('Error fetching or updating user data:', error);
+                // Maybe show a toast error? Decide if logout is appropriate here.
+                // showToast('Could not load user data.', 'danger');
+            }
+        }
+
+        // --- NEW: Function to Update User Info Display Elements ---
+        function updateUserInfoDisplay(user) {
+            if (!user) return;
+
+            // Update Name
+            const userNameElement = document.getElementById('user-name');
+            if (userNameElement) userNameElement.textContent = user.name || 'User';
+
+            // Update Avatar (Image or Initials)
+            const imgAvatar = document.getElementById('user-avatar-image');
+            const initialsAvatar = document.getElementById('user-avatar-initials');
+            const initialsLetter = document.getElementById('user-avatar-letter');
+            if (imgAvatar && initialsAvatar && initialsLetter) {
+                if (user.profilePictureUrl) {
+                    imgAvatar.src = user.profilePictureUrl;
+                    imgAvatar.classList.remove('d-none');
+                    initialsAvatar.classList.add('d-none');
+                } else {
+                    initialsLetter.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                    imgAvatar.classList.add('d-none');
+                    initialsAvatar.classList.remove('d-none');
+                }
+            }
+
+            // Update Points Display
+            const pointsBalanceElement = document.getElementById('points-balance');
+            if (pointsBalanceElement) {
+                pointsBalanceElement.textContent = user.pointsBalance !== undefined ? user.pointsBalance.toFixed(2) : 'N/A';
+            }
+
+            // Update API Token Display
+            const token = localStorage.getItem('token'); // Get token again
+            const tokenDisplayElement = document.getElementById('api-token-display-new');
+            if (tokenDisplayElement && token) {
+                tokenDisplayElement.querySelector('.token-content').textContent = token;
+            } else if (!token) {
+                console.warn('API token display element not found or token missing.');
+            }
+        }
+
         // Initialize Bootstrap components
-        document.addEventListener('DOMContentLoaded', function () {
+        function initializeBootstrapComponents() {
             // Initialize all tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -803,7 +835,7 @@ https://zynchat.koyeb.app/api/check-sessions \
 
             // Add animations to elements as they appear in viewport
             animateElementsOnScroll();
-        });
+        }
 
         // Animation for elements on scroll
         function animateElementsOnScroll() {
@@ -1754,25 +1786,6 @@ https://wapiconnect.koyeb.app/api/auto-reply-rules \\
                 if (response.ok) {
                     statusElement.textContent = `${response.status} ${response.statusText}`;
                     statusElement.className = 'status-code status-success';
-
-                    // Check if the request potentially deducted points and update display
-                    // We don't know the exact cost here, so fetch the latest user data
-                    // Alternatively, the backend could return the new balance
-                    if (method !== 'GET') { // Assume POST/PUT/DELETE might deduct points
-                        try {
-                            const meResponse = await fetch('/api/auth/me', {
-                                headers: addAuthHeader()
-                            });
-                            if (meResponse.ok) {
-                                const meData = await meResponse.json();
-                                if (meData.user && meData.user.pointsBalance !== undefined) {
-                                    updatePointsDisplay(meData.user.pointsBalance);
-                                }
-                            }
-                        } catch (meError) {
-                            console.error('Error fetching updated user data after request:', meError);
-                        }
-                    }
                 } else {
                     statusElement.textContent = `${response.status} ${response.statusText}`;
                     statusElement.className = 'status-code status-error';
@@ -1829,20 +1842,6 @@ https://wapiconnect.koyeb.app/api/auto-reply-rules \\
                 });
             }
         });
-
-        // --- New Function: Update Points Display ---
-        function updatePointsDisplay(newBalance) {
-            const pointsBalanceElement = document.getElementById('points-balance');
-            if (pointsBalanceElement) {
-                pointsBalanceElement.textContent = newBalance !== undefined ? newBalance.toFixed(2) : 'N/A';
-            }
-            // Update localStorage as well
-            const user = getCurrentUser();
-            if (user) {
-                user.pointsBalance = newBalance;
-                localStorage.setItem('user', JSON.stringify(user));
-            }
-        }
     </script>
 </body>
 
