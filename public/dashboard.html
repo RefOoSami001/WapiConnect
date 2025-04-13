@@ -452,6 +452,28 @@
 
                     <!-- Auto-Reply Section -->
                     <div class="main-content" id="auto-reply-section">
+
+                        <!-- List Auto-Reply Rules -->
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon list-icon">
+                                    <i class="bi bi-list-ul"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>List Auto-Reply Rules</h3>
+                                    <span class="api-method method-get">GET</span>
+                                    <span class="api-endpoint">/api/auto-reply-rules</span>
+                                </div>
+                            </div>
+                            <div class="api-card-body">
+                                <p>Retrieve all auto-reply rules (both active and inactive) created by the authenticated
+                                    user.</p>
+                                <button class="action-button" onclick="runApiRequest('list-auto-reply')">
+                                    <i class="bi bi-arrow-repeat me-2"></i>List My Rules
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Create Auto-Reply Rule -->
                         <div class="api-card">
                             <div class="api-card-header">
@@ -1528,9 +1550,9 @@ https://zynchat.koyeb.app/api/get-contacts \\
                     break;
 
                 case '#auto-reply-section':
-                    const ruleNameInput = document.getElementById('rule-name');
-                    const toggleRuleInput = document.getElementById('toggle-rule-id');
-                    const deleteRuleInput = document.getElementById('delete-rule-id');
+                    const ruleNameInput = document.getElementById('rule-name'); // Check if create form has input
+                    const toggleRuleInput = document.getElementById('toggle-rule-id'); // Check if toggle form has input
+                    const deleteRuleInput = document.getElementById('delete-rule-id'); // Check if delete form has input
 
                     if (ruleNameInput && ruleNameInput.value) {
                         const ruleName = getValue('rule-name', 'My Auto Reply');
@@ -1577,7 +1599,7 @@ https://zynchat.koyeb.app/api/auto-reply-rules/${deleteRuleId} \\
                     } else {
                         // Default to list rules
                         curlCommand = `curl -X GET \\
-https://zynchat.koyeb.app/api/auto-reply-rules \\
+https://wapiconnect.koyeb.app/api/auto-reply-rules \\
 -H 'Authorization: Bearer ${token}'`;
                     }
                     break;
@@ -1752,6 +1774,12 @@ https://wapiconnect.koyeb.app/api/auth/me \\
                     if (!isValid) break;
                     method = 'DELETE';
                     endpoint = `/api/auto-reply-rules/${ruleId}`;
+                    break;
+
+                case 'list-auto-reply':
+                    // No inputs to validate
+                    endpoint = '/api/auto-reply-rules';
+                    method = 'GET';
                     break;
 
                 case 'get-me':
