@@ -212,6 +212,9 @@
                         <button class="sidebar-tab" data-target="#auto-reply-section">
                             <i class="bi bi-reply-all"></i>Auto-Reply
                         </button>
+                        <button class="sidebar-tab" data-target="#me-section">
+                            <i class="bi bi-person-badge"></i>Get User Info
+                        </button>
                     </div>
                 </div>
 
@@ -587,6 +590,31 @@
                                 <button class="action-button delete-button"
                                     onclick="runApiRequest('delete-auto-reply')">
                                     <i class="bi bi-trash me-2"></i>Delete Rule
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Get User Info Section -->
+                    <div class="main-content" id="me-section">
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon me-icon">
+                                    <i class="bi bi-person-badge"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Get Current User Info</h3>
+                                    <span class="api-method method-get">GET</span>
+                                    <span class="api-endpoint">/api/auth/me</span>
+                                </div>
+                            </div>
+                            <div class="api-card-body">
+                                <p>Retrieves the profile information (including name, email, profile picture, and points
+                                    balance) for the currently authenticated user based on the provided JWT token.</p>
+                                <p>This endpoint is useful for verifying a token and getting up-to-date user details.
+                                </p>
+                                <button class="action-button" onclick="runApiRequest('get-me')">
+                                    <i class="bi bi-arrow-repeat me-2"></i>Get My Info
                                 </button>
                             </div>
                         </div>
@@ -1553,6 +1581,17 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
 -H 'Authorization: Bearer ${token}'`;
                     }
                     break;
+
+                case '#me-section':
+                    curlCommand = `curl -X GET \\
+https://wapiconnect.koyeb.app/api/auth/me \\
+-H 'Authorization: Bearer ${token}'`;
+                    break;
+
+                default:
+                    console.error('Unknown request type:', activeTabId);
+                    curlCommand = 'Please fill in parameters to generate command.';
+                    break;
             }
 
             // Update the curl code display with animation
@@ -1713,6 +1752,12 @@ https://zynchat.koyeb.app/api/auto-reply-rules \\
                     if (!isValid) break;
                     method = 'DELETE';
                     endpoint = `/api/auto-reply-rules/${ruleId}`;
+                    break;
+
+                case 'get-me':
+                    // No inputs to validate
+                    endpoint = '/api/auth/me';
+                    method = 'GET';
                     break;
 
                 default:
