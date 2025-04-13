@@ -13,7 +13,7 @@ const auth = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.userId);
+        const user = await User.findById(decoded.userId).select('id email name profilePictureUrl pointsBalance');
 
         if (!user) {
             throw new Error('User not found');
@@ -81,7 +81,9 @@ router.get('/me', auth, async (req, res) => {
         user: {
             id: req.user._id,
             email: req.user.email,
-            name: req.user.name
+            name: req.user.name,
+            profilePictureUrl: req.user.profilePictureUrl,
+            pointsBalance: req.user.pointsBalance
         }
     });
 });
