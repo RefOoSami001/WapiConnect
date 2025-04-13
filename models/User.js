@@ -32,6 +32,11 @@ const userSchema = new mongoose.Schema({
         required: true,
         default: 50 // Default points for new users
     },
+    apiKey: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
     createdAt: {
         type: Date,
         default: Date.now

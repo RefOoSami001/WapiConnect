@@ -563,8 +563,57 @@ async function createSession(sessionId, userId) {
     }
 }
 
-// API endpoints
-app.post('/api/create-session', auth, async (req, res) => {
+// API Key middleware
+const apiKeyAuth = async (req, res, next) => {
+    const apiKey = req.headers['x-api-key'];
+    if (!apiKey) {
+        return res.status(401).json({ error: 'API key is required' });
+    }
+
+    try {
+        const user = await User.findOne({ apiKey });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid API key' });
+        }
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error('API key validation error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Generate API key endpoint
+app.post('/api/generate-api-key', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
+
+    try {
+        const apiKey = crypto.randomBytes(32).toString('hex');
+        req.user.apiKey = apiKey;
+        await req.user.save();
+        res.json({ apiKey });
+    } catch (error) {
+        console.error('Error generating API key:', error);
+        res.status(500).json({ error: 'Failed to generate API key' });
+    }
+});
+
+// Revoke API key endpoint
+app.post('/api/revoke-api-key', auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
+
+    try {
+        req.user.apiKey = null;
+        await req.user.save();
+        res.json({ message: 'API key revoked successfully' });
+    } catch (error) {
+        console.error('Error revoking API key:', error);
+        res.status(500).json({ error: 'Failed to revoke API key' });
+    }
+});
+
+// Update existing endpoints to use both auth methods
+app.post('/api/create-session', [auth, apiKeyAuth], async (req, res) => {
     if (!req.user) {
         return res.status(401).json({ error: 'Authentication required.' });
     }
@@ -704,7 +753,7 @@ const validatePhoneNumber = (req, res, next) => {
 };
 
 // Add endpoint to send message
-app.post('/api/send-message', auth, validatePhoneNumber, async (req, res) => {
+app.post('/api/send-message', [auth, apiKeyAuth], validatePhoneNumber, async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     const { sessionId, numbers, message, imageData } = req.body;
     console.log('Received message request:', { sessionId, numbers, message, hasImage: !!imageData });
@@ -916,7 +965,7 @@ setInterval(cleanupStaleSessions, 60 * 60 * 1000);
 setInterval(cleanupStaleAuthStates, 60 * 60 * 1000);
 
 // Add endpoint to get contacts
-app.post('/api/get-contacts', auth, async (req, res) => {
+app.post('/api/get-contacts', [auth, apiKeyAuth], async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     // --- Point Check ---
     const cost = COSTS.FETCH_CONTACTS;
@@ -1037,7 +1086,7 @@ app.post('/api/get-contacts', auth, async (req, res) => {
 });
 
 // Add endpoint to get group members
-app.post('/api/get-group-members', auth, async (req, res) => {
+app.post('/api/get-group-members', [auth, apiKeyAuth], async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
     // --- Point Check ---
     const cost = COSTS.FETCH_GROUP_MEMBERS;

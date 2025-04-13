@@ -726,6 +726,44 @@ https://zynchat.koyeb.app/api/check-sessions \
         <!-- Toasts will be added here -->
     </div>
 
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">API Key Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="apiKeyStatus" class="mb-3">
+                            <p class="mb-2">Your API Key Status: <span id="apiKeyStatusText">Loading...</span></p>
+                            <div id="apiKeyDisplay" class="d-none">
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="apiKey" readonly>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="copyApiKey()">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Please store this API key securely. You won't be able to see it again after closing
+                                    this page.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" onclick="generateApiKey()" id="generateApiKeyBtn">
+                                <i class="fas fa-key"></i> Generate New API Key
+                            </button>
+                            <button class="btn btn-danger" onclick="revokeApiKey()" id="revokeApiKeyBtn" disabled>
+                                <i class="fas fa-ban"></i> Revoke API Key
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/auth.js"></script>
@@ -745,113 +783,49 @@ https://zynchat.koyeb.app/api/check-sessions \
                 window.history.replaceState({}, document.title, window.location.pathname);
             } catch (e) {
                 console.error("Error processing token/user from URL:", e);
-                // Clear potentially bad data and redirect to login with an error
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                auth.clearAuthData();
                 window.location.href = 'login.html?error=auth_processing_error';
             }
         }
         // --- End URL Handling ---
 
         // Now check authentication (it should find the token in localStorage if it was just set)
-        requireAuth();
+        auth.requireAuth();
 
         // Fetch latest user data on load to ensure points/info are up-to-date
-        fetchAndUpdateUserData();
+        async function fetchAndUpdateUserData() {
+            try {
+                const response = await fetch('/api/auth/me', {
+                    headers: auth.addAuthHeader()
+                });
 
-        // Initialize Bootstrap components after DOM is ready
-        initializeBootstrapComponents();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                localStorage.setItem('user', JSON.stringify(data.user));
+                updateUserInfo(data.user);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                auth.handleAuthError(error);
+            }
+        }
 
         // Function to add auth header to requests
         function addAuthHeader() {
-            const token = localStorage.getItem('token');
-            return {
-                'Authorization': `Bearer ${token}`,
+            return auth.addAuthHeader({
                 'Content-Type': 'application/json'
-            };
+            });
         }
 
         // Logout function
         function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/login.html';
+            auth.clearAuthData();
+            window.location.href = 'login.html';
         }
 
-        // --- NEW: Function to Fetch and Update User Data on Load ---
-        async function fetchAndUpdateUserData() {
-            console.log('Fetching latest user data...');
-            try {
-                const response = await fetch('/api/auth/me', {
-                    headers: addAuthHeader()
-                });
-                if (!response.ok) {
-                    // Handle auth errors, maybe redirect to login
-                    if (response.status === 401) {
-                        console.error('Auth error fetching user data, redirecting to login.');
-                        logout(); // Use logout to clear storage and redirect
-                        return;
-                    }
-                    throw new Error(`Failed to fetch user data: ${response.statusText}`);
-                }
-                const data = await response.json();
-                if (data.user) {
-                    console.log('User data received:', data.user);
-                    // Update localStorage with fresh data
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    // Update the UI
-                    updateUserInfoDisplay(data.user);
-                } else {
-                    console.error('User data not found in /api/auth/me response');
-                }
-            } catch (error) {
-                console.error('Error fetching or updating user data:', error);
-                // Maybe show a toast error? Decide if logout is appropriate here.
-                // showToast('Could not load user data.', 'danger');
-            }
-        }
-
-        // --- NEW: Function to Update User Info Display Elements ---
-        function updateUserInfoDisplay(user) {
-            if (!user) return;
-
-            // Update Name
-            const userNameElement = document.getElementById('user-name');
-            if (userNameElement) userNameElement.textContent = user.name || 'User';
-
-            // Update Avatar (Image or Initials)
-            const imgAvatar = document.getElementById('user-avatar-image');
-            const initialsAvatar = document.getElementById('user-avatar-initials');
-            const initialsLetter = document.getElementById('user-avatar-letter');
-            if (imgAvatar && initialsAvatar && initialsLetter) {
-                if (user.profilePictureUrl) {
-                    imgAvatar.src = user.profilePictureUrl;
-                    imgAvatar.classList.remove('d-none');
-                    initialsAvatar.classList.add('d-none');
-                } else {
-                    initialsLetter.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
-                    imgAvatar.classList.add('d-none');
-                    initialsAvatar.classList.remove('d-none');
-                }
-            }
-
-            // Update Points Display
-            const pointsBalanceElement = document.getElementById('points-balance');
-            if (pointsBalanceElement) {
-                pointsBalanceElement.textContent = user.pointsBalance !== undefined ? user.pointsBalance.toFixed(2) : 'N/A';
-            }
-
-            // Update API Token Display
-            const token = localStorage.getItem('token'); // Get token again
-            const tokenDisplayElement = document.getElementById('api-token-display-new');
-            if (tokenDisplayElement && token) {
-                tokenDisplayElement.querySelector('.token-content').textContent = token;
-            } else if (!token) {
-                console.warn('API token display element not found or token missing.');
-            }
-        }
-
-        // Initialize Bootstrap components
+        // Initialize Bootstrap components after DOM is ready
         function initializeBootstrapComponents() {
             // Initialize all tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -886,6 +860,12 @@ https://zynchat.koyeb.app/api/check-sessions \
             // Add animations to elements as they appear in viewport
             animateElementsOnScroll();
         }
+
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeBootstrapComponents();
+            fetchAndUpdateUserData();
+        });
 
         // Animation for elements on scroll
         function animateElementsOnScroll() {
@@ -1440,6 +1420,8 @@ https://zynchat.koyeb.app/api/check-sessions \
 
             // Ensure proper textarea sizing
             autoSizeTextareas();
+
+            checkApiKeyStatus();
         });
 
         // Function to auto-size textareas to fit content
@@ -1915,6 +1897,88 @@ https://zynchat.koyeb.app/api/auth/me \\
                 });
             }
         });
+
+        // API Key Management Functions
+        async function checkApiKeyStatus() {
+            try {
+                const response = await fetch('/api/check-api-key', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.apiKey) {
+                    document.getElementById('apiKeyStatusText').textContent = 'Active';
+                    document.getElementById('apiKeyDisplay').classList.remove('d-none');
+                    document.getElementById('apiKey').value = data.apiKey;
+                    document.getElementById('revokeApiKeyBtn').disabled = false;
+                } else {
+                    document.getElementById('apiKeyStatusText').textContent = 'No API Key';
+                    document.getElementById('apiKeyDisplay').classList.add('d-none');
+                    document.getElementById('revokeApiKeyBtn').disabled = true;
+                }
+            } catch (error) {
+                console.error('Error checking API key status:', error);
+                document.getElementById('apiKeyStatusText').textContent = 'Error checking status';
+            }
+        }
+
+        async function generateApiKey() {
+            try {
+                const response = await fetch('/api/generate-api-key', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.apiKey) {
+                    document.getElementById('apiKeyStatusText').textContent = 'Active';
+                    document.getElementById('apiKeyDisplay').classList.remove('d-none');
+                    document.getElementById('apiKey').value = data.apiKey;
+                    document.getElementById('revokeApiKeyBtn').disabled = false;
+                    showAlert('success', 'API key generated successfully');
+                }
+            } catch (error) {
+                console.error('Error generating API key:', error);
+                showAlert('danger', 'Failed to generate API key');
+            }
+        }
+
+        async function revokeApiKey() {
+            if (!confirm('Are you sure you want to revoke your API key? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/revoke-api-key', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.message) {
+                    document.getElementById('apiKeyStatusText').textContent = 'No API Key';
+                    document.getElementById('apiKeyDisplay').classList.add('d-none');
+                    document.getElementById('revokeApiKeyBtn').disabled = true;
+                    showAlert('success', 'API key revoked successfully');
+                }
+            } catch (error) {
+                console.error('Error revoking API key:', error);
+                showAlert('danger', 'Failed to revoke API key');
+            }
+        }
+
+        function copyApiKey() {
+            const apiKeyInput = document.getElementById('apiKey');
+            apiKeyInput.select();
+            document.execCommand('copy');
+            showAlert('success', 'API key copied to clipboard');
+        }
     </script>
 </body>
 

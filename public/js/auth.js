@@ -6,13 +6,27 @@ function isAuthenticated() {
 
 // Get authentication token
 function getAuthToken() {
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('No token found in localStorage');
+        return null;
+    }
+    return token;
 }
 
 // Get current user
 function getCurrentUser() {
     const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr) {
+        console.error('No user data found in localStorage');
+        return null;
+    }
+    try {
+        return JSON.parse(userStr);
+    } catch (error) {
+        console.error('Error parsing user data:', error);
+        return null;
+    }
 }
 
 // Logout user
@@ -26,21 +40,49 @@ function logout() {
 // Add auth header to fetch requests
 function addAuthHeader(headers = {}) {
     const token = getAuthToken();
-    if (token) {
-        return {
-            ...headers,
-            'Authorization': `Bearer ${token}`
-        };
+    if (!token) {
+        console.error('Cannot add auth header: No token available');
+        return headers;
     }
-    return headers;
+    return {
+        ...headers,
+        'Authorization': `Bearer ${token}`
+    };
 }
 
 // Redirect to login if not authenticated (for protected pages)
 function requireAuth() {
     if (!isAuthenticated()) {
+        console.log('User not authenticated, redirecting to login...');
         window.location.href = 'login.html';
     }
 }
+
+// Clear auth data
+function clearAuthData() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+}
+
+// Handle auth errors
+function handleAuthError(error) {
+    console.error('Authentication error:', error);
+    if (error.status === 401) {
+        clearAuthData();
+        window.location.href = 'login.html?error=session_expired';
+    }
+}
+
+// Export functions
+window.auth = {
+    isAuthenticated,
+    getAuthToken,
+    getCurrentUser,
+    addAuthHeader,
+    requireAuth,
+    clearAuthData,
+    handleAuthError
+};
 
 // Remove the DOMContentLoaded listener that handles redirects on login/signup pages
 // The login page now handles its own logic for checking URL params and existing tokens.
