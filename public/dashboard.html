@@ -1599,14 +1599,14 @@ https://zynchat.koyeb.app/api/auto-reply-rules/${deleteRuleId} \\
                     } else {
                         // Default to list rules
                         curlCommand = `curl -X GET \\
-https://wapiconnect.koyeb.app/api/auto-reply-rules \\
+https://zynchat.koyeb.app/api/auto-reply-rules \\
 -H 'Authorization: Bearer ${token}'`;
                     }
                     break;
 
                 case '#me-section':
                     curlCommand = `curl -X GET \\
-https://wapiconnect.koyeb.app/api/auth/me \\
+https://zynchat.koyeb.app/api/auth/me \\
 -H 'Authorization: Bearer ${token}'`;
                     break;
 

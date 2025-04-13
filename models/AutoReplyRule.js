@@ -70,6 +70,13 @@ autoReplyRuleSchema.pre('save', function (next) {
     next();
 });
 
+// Add indexes for frequently queried fields
+autoReplyRuleSchema.index({ userId: 1 });
+autoReplyRuleSchema.index({ sessionId: 1 });
+autoReplyRuleSchema.index({ isActive: 1 });
+autoReplyRuleSchema.index({ userId: 1, isActive: 1 }); // Compound index for common queries
+autoReplyRuleSchema.index({ triggerType: 1, triggerValue: 1 }); // For quick rule lookups
+
 const AutoReplyRule = mongoose.model('AutoReplyRule', autoReplyRuleSchema);
 
 module.exports = AutoReplyRule; 

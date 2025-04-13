@@ -40,23 +40,28 @@ async function deductPoints(userId, cost) {
     if (!userId || cost <= 0) return true; // Don't deduct if no user or cost is zero/negative
 
     try {
-        const user = await User.findById(userId);
-        if (!user) {
-            console.error(`[Points] User not found for deduction: ${userId}`);
-            return false; // User not found
-        }
+        // Use findOneAndUpdate with atomic operation to prevent race conditions
+        const result = await User.findOneAndUpdate(
+            {
+                _id: userId,
+                pointsBalance: { $gte: cost } // Only update if user has enough points
+            },
+            {
+                $inc: { pointsBalance: -cost } // Atomic decrement
+            },
+            {
+                new: true, // Return the updated document
+                projection: { pointsBalance: 1 } // Only return the pointsBalance field
+            }
+        );
 
-        if (user.pointsBalance >= cost) {
-            user.pointsBalance -= cost;
-            // Round to avoid floating point issues (e.g., 4 decimal places)
-            user.pointsBalance = Math.round(user.pointsBalance * 10000) / 10000;
-            await user.save();
-            console.log(`[Points] Deducted ${cost} points from user ${userId}. New balance: ${user.pointsBalance}`);
-            return true; // Sufficient points
-        } else {
-            console.log(`[Points] Insufficient points for user ${userId}. Required: ${cost}, Balance: ${user.pointsBalance}`);
+        if (!result) {
+            console.log(`[Points] Insufficient points for user ${userId}. Required: ${cost}`);
             return false; // Insufficient points
         }
+
+        console.log(`[Points] Deducted ${cost} points from user ${userId}. New balance: ${result.pointsBalance}`);
+        return true; // Successfully deducted points
     } catch (error) {
         console.error(`[Points] Error deducting points for user ${userId}:`, error);
         return false; // Error occurred
@@ -135,6 +140,15 @@ const sessions = new Map();
 // MongoDB connection
 mongoose.connect(MONGODB_URI, {
     serverSelectionTimeoutMS: 5000,
+    maxPoolSize: 50, // Maximum number of connections in the connection pool
+    minPoolSize: 10, // Minimum number of connections in the connection pool
+    socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+    family: 4, // Use IPv4, skip trying IPv6
+    autoIndex: true, // Build indexes automatically
+    retryWrites: true, // Retry write operations
+    retryReads: true, // Retry read operations
+    connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
+    heartbeatFrequencyMS: 300000 // Send a heartbeat every 5 minutes
 })
     .then(() => console.log('Connected to MongoDB Atlas'))
     .catch(err => {
@@ -696,8 +710,22 @@ app.post('/api/send-message', auth, validatePhoneNumber, async (req, res) => {
     console.log('Received message request:', { sessionId, numbers, message, hasImage: !!imageData });
 
     const session = sessions.get(sessionId);
-    if (!session || session.userId.toString() !== req.user._id.toString()) {
-        return res.status(404).json({ error: 'Session not found' });
+    if (!session) {
+        // Check if session exists in database
+        const dbSession = await Session.findOne({ sessionId, userId: req.user._id });
+        if (!dbSession) {
+            console.log(`[${req.user._id}] Session ${sessionId} not found in memory or database`);
+            return res.status(404).json({ error: 'Session not found' });
+        }
+        // If session exists in DB but not memory, it's disconnected
+        console.log(`[${req.user._id}] Session ${sessionId} found in database but not memory (disconnected)`);
+        return res.status(403).json({ error: 'Session is not active' });
+    }
+
+    // Verify session ownership
+    if (session.userId.toString() !== req.user._id.toString()) {
+        console.warn(`[${req.user._id}] Attempted to access session ${sessionId} owned by user ${session.userId}`);
+        return res.status(403).json({ error: 'You do not have permission to access this session' });
     }
 
     // --- Point Check ---
@@ -821,44 +849,63 @@ async function cleanupStaleAuthStates() {
 async function cleanupStaleSessions() {
     try {
         const staleTime = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        // Find all stale sessions in one query
         const staleSessions = await Session.find({
             lastActive: { $lt: staleTime },
             status: { $ne: 'disconnected' }
-        });
+        }).select('sessionId userId');
 
-        for (const session of staleSessions) {
-            if (sessions.has(session.sessionId)) {
-                const activeSession = sessions.get(session.sessionId);
+        if (staleSessions.length === 0) {
+            return; // No stale sessions to clean up
+        }
+
+        // Prepare bulk operations
+        const sessionIds = staleSessions.map(session => session.sessionId);
+        const userIds = staleSessions.map(session => session.userId);
+
+        // Clean up in-memory sessions
+        for (const sessionId of sessionIds) {
+            if (sessions.has(sessionId)) {
+                const activeSession = sessions.get(sessionId);
                 if (activeSession?.sock) {
                     try {
                         if (typeof activeSession.sock.end === 'function') {
                             activeSession.sock.end();
                         }
-
                         if (typeof activeSession.sock.removeAllListeners === 'function') {
                             activeSession.sock.removeAllListeners();
                         } else if (activeSession.sock.ev && typeof activeSession.sock.ev.removeAllListeners === 'function') {
-                            // Try to access event emitter if available
                             activeSession.sock.ev.removeAllListeners();
                         }
                     } catch (cleanupError) {
-                        console.log(`Error cleaning up stale session ${session.sessionId}:`, cleanupError);
+                        console.log(`Error cleaning up stale session ${sessionId}:`, cleanupError);
                     }
                 }
-                sessions.delete(session.sessionId);
-            }
-
-            await Session.findOneAndUpdate(
-                { sessionId: session.sessionId },
-                { status: 'disconnected' }
-            );
-
-            try {
-                await mongoose.connection.db.dropCollection(`authState_${session.sessionId}`);
-            } catch (error) {
-                console.log(`Error dropping auth collection for session ${session.sessionId}:`, error);
+                sessions.delete(sessionId);
             }
         }
+
+        // Bulk update session status
+        await Session.updateMany(
+            { sessionId: { $in: sessionIds } },
+            { status: 'disconnected' }
+        );
+
+        // Drop auth collections in parallel
+        await Promise.all(
+            sessionIds.map(async (sessionId) => {
+                try {
+                    await mongoose.connection.db.dropCollection(`authState_${sessionId}`);
+                } catch (error) {
+                    if (!error.message.includes('ns not found')) {
+                        console.log(`Error dropping auth collection for session ${sessionId}:`, error);
+                    }
+                }
+            })
+        );
+
+        console.log(`Cleaned up ${staleSessions.length} stale sessions`);
     } catch (error) {
         console.error('Error cleaning up stale sessions:', error);
     }
@@ -882,8 +929,22 @@ app.post('/api/get-contacts', auth, async (req, res) => {
     console.log(`Getting ${source} for session: ${sessionId}`);
 
     const session = sessions.get(sessionId);
-    if (!session || session.userId.toString() !== req.user._id.toString()) {
-        return res.status(404).json({ error: 'Session not found' });
+    if (!session) {
+        // Check if session exists in database
+        const dbSession = await Session.findOne({ sessionId, userId: req.user._id });
+        if (!dbSession) {
+            console.log(`[${req.user._id}] Session ${sessionId} not found in memory or database`);
+            return res.status(404).json({ error: 'Session not found' });
+        }
+        // If session exists in DB but not memory, it's disconnected
+        console.log(`[${req.user._id}] Session ${sessionId} found in database but not memory (disconnected)`);
+        return res.status(403).json({ error: 'Session is not active' });
+    }
+
+    // Verify session ownership
+    if (session.userId.toString() !== req.user._id.toString()) {
+        console.warn(`[${req.user._id}] Attempted to access session ${sessionId} owned by user ${session.userId}`);
+        return res.status(403).json({ error: 'You do not have permission to access this session' });
     }
 
     try {
@@ -989,8 +1050,22 @@ app.post('/api/get-group-members', auth, async (req, res) => {
     console.log(`Getting members for group: ${groupId} in session: ${sessionId}`);
 
     const session = sessions.get(sessionId);
-    if (!session || session.userId.toString() !== req.user._id.toString()) {
-        return res.status(404).json({ error: 'Session not found' });
+    if (!session) {
+        // Check if session exists in database
+        const dbSession = await Session.findOne({ sessionId, userId: req.user._id });
+        if (!dbSession) {
+            console.log(`[${req.user._id}] Session ${sessionId} not found in memory or database`);
+            return res.status(404).json({ error: 'Session not found' });
+        }
+        // If session exists in DB but not memory, it's disconnected
+        console.log(`[${req.user._id}] Session ${sessionId} found in database but not memory (disconnected)`);
+        return res.status(403).json({ error: 'Session is not active' });
+    }
+
+    // Verify session ownership
+    if (session.userId.toString() !== req.user._id.toString()) {
+        console.warn(`[${req.user._id}] Attempted to access session ${sessionId} owned by user ${session.userId}`);
+        return res.status(403).json({ error: 'You do not have permission to access this session' });
     }
 
     try {
@@ -1255,3 +1330,4 @@ server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     checkExistingSessions();
 });
+

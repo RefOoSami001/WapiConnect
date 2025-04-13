@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+// Add indexes for frequently queried fields
+userSchema.index({ pointsBalance: 1 });
+userSchema.index({ lastLogin: 1 });
+
 // Remove password hashing logic
 // userSchema.pre('save', async function (next) {
 //     if (!this.isModified('password')) return next();

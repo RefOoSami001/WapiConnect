@@ -26,4 +26,10 @@ const sessionSchema = new mongoose.Schema({
     }
 });
 
+// Add indexes for frequently queried fields
+sessionSchema.index({ userId: 1 });
+sessionSchema.index({ status: 1 });
+sessionSchema.index({ lastActive: 1 });
+sessionSchema.index({ userId: 1, status: 1 }); // Compound index for common queries
+
 module.exports = mongoose.model('Session', sessionSchema); 
