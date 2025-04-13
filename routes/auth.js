@@ -54,7 +54,7 @@ router.get('/google/callback',
             await req.user.save();
 
             const payload = { userId: req.user._id };
-            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
 
             const userData = JSON.stringify({
                 id: req.user._id,
