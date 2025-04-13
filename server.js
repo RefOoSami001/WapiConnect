@@ -636,7 +636,13 @@ app.delete('/api/delete-session/:sessionId', auth, async (req, res) => {
             if (session.userId.toString() === req.user._id.toString()) {
                 if (session?.sock) {
                     try {
-                        if (typeof session.sock.end === 'function') {
+                        // Use logout() for a cleaner disconnect that prevents auto-reconnect
+                        if (typeof session.sock.logout === 'function') {
+                            console.log(`Logging out socket for session ${sessionId}...`);
+                            await session.sock.logout(); // Use await if logout is async
+                            console.log(`Socket logout initiated for session ${sessionId}.`);
+                        } else if (typeof session.sock.end === 'function') {
+                            // Fallback if logout isn't available for some reason
                             session.sock.end();
                         }
 
@@ -647,7 +653,8 @@ app.delete('/api/delete-session/:sessionId', auth, async (req, res) => {
                             session.sock.ev.removeAllListeners();
                         }
                     } catch (cleanupError) {
-                        console.log(`Error cleaning up session ${sessionId}:`, cleanupError);
+                        console.error(`Error during socket cleanup for session ${sessionId}:`, cleanupError);
+                        // Continue cleanup despite socket errors
                     }
                 }
                 sessions.delete(sessionId);
