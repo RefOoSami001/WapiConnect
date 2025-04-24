@@ -9,12 +9,16 @@ A web application for managing WhatsApp sessions and sending messages using the 
 - Real-time status updates
 - Modern and responsive UI
 - Auto-reply rules based on triggers and conditions
+- Google OAuth authentication
+- Points system for user engagement
+- User profile management
 
 ## Prerequisites
 
 * Node.js 18.x or higher
 * MongoDB database
 * npm or yarn package manager
+* Google OAuth credentials (for authentication)
 
 ## Local Development
 
@@ -26,9 +30,34 @@ PORT=3000
 NODE_ENV=development  
 MONGODB_URI=your_mongodb_connection_string  
 JWT_SECRET=your_jwt_secret  
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
 ```
 4. Start the server: `npm start`
 5. Open your browser and navigate to `http://localhost:3000`
+
+## Authentication
+
+The application supports two authentication methods:
+1. Google OAuth (Recommended)
+   - Users can sign in with their Google account
+   - Profile picture and basic information are automatically synced
+2. Email/Password (Legacy)
+   - Traditional email and password authentication
+
+## Points System
+
+Users are awarded points for various actions:
+- Initial signup: 50 points
+- Daily login bonus
+- Message sending activities
+- Session management tasks
+
+Points can be used for:
+- Priority message sending
+- Advanced features access
+- Session management tools
 
 ## Deployment on Render.com
 
@@ -54,6 +83,9 @@ JWT_SECRET=your_jwt_secret
    * `NODE_ENV`: production
    * `MONGODB_URI`: Your MongoDB connection string
    * `JWT_SECRET`: A strong random string for JWT token generation
+   * `GOOGLE_CLIENT_ID`: Your Google OAuth client ID
+   * `GOOGLE_CLIENT_SECRET`: Your Google OAuth client secret
+   * `GOOGLE_CALLBACK_URL`: Your production callback URL
 6. Click "Create Web Service"
 
 ### Alternative Deployment with render.yaml
@@ -73,6 +105,9 @@ This repository includes a `render.yaml` file for easier deployment:
 * `NODE_ENV`: Application environment (development/production)
 * `MONGODB_URI`: MongoDB connection string
 * `JWT_SECRET`: Secret key for JWT token generation
+* `GOOGLE_CLIENT_ID`: Google OAuth client ID
+* `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
+* `GOOGLE_CALLBACK_URL`: OAuth callback URL
 
 ## Docker Support
 

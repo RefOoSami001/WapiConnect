@@ -72,6 +72,679 @@
             color: #4caf83;
             /* gem with soft green tone */
         }
+
+        /* Enhanced Pricing Tab Colors */
+        .pricing-header {
+            margin-bottom: 30px;
+        }
+
+        .pricing-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+        }
+
+        .pricing-subtitle {
+            font-size: 1rem;
+            color: #555;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Pricing Plan Cards */
+        .pricing-plan-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            height: 100%;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border: 1px solid #eaeaea;
+        }
+
+        .pricing-plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .pricing-plan-card.popular {
+            border: 2px solid #3a7f5d;
+            box-shadow: 0 5px 20px rgba(58, 127, 93, 0.2);
+            background-color: #f8fffc;
+        }
+
+        .popular-tag {
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            background: #3a7f5d;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(58, 127, 93, 0.3);
+        }
+
+        .plan-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .plan-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            background: #3a7f5d;
+            color: white;
+            font-size: 1.25rem;
+            box-shadow: 0 3px 10px rgba(58, 127, 93, 0.2);
+        }
+
+        .plan-header h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #222;
+        }
+
+        .plan-price {
+            margin-bottom: 10px;
+        }
+
+        .currency {
+            font-size: 1rem;
+            color: #666;
+            vertical-align: top;
+        }
+
+        .amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .plan-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0;
+        }
+
+        .plan-features ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            flex-grow: 1;
+        }
+
+        .plan-features li {
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            color: #444;
+        }
+
+        .plan-features li i {
+            color: #3a7f5d;
+            margin-right: 8px;
+        }
+
+        .plan-features .btn-outline-primary {
+            color: #3a7f5d;
+            border-color: #3a7f5d;
+        }
+
+        .plan-features .btn-outline-primary:hover {
+            background-color: #3a7f5d;
+            color: white;
+        }
+
+        .plan-features .btn-primary {
+            background-color: #3a7f5d;
+            border-color: #3a7f5d;
+        }
+
+        .plan-features .btn-primary:hover {
+            background-color: #2c6348;
+            border-color: #2c6348;
+        }
+
+        /* Cost Table */
+        .cost-table-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #eaeaea;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .cost-table th {
+            background-color: #f0f8f4;
+            font-weight: 600;
+            color: #222;
+            border-bottom: none;
+            padding: 12px 15px;
+        }
+
+        .cost-table td {
+            vertical-align: middle;
+            border-color: #eaeaea;
+            padding: 12px 15px;
+            color: #444;
+        }
+
+        .cost-table i {
+            color: #3a7f5d;
+            margin-right: 8px;
+        }
+
+        .cost-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            color: #3a7f5d;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* FAQ Section */
+        .pricing-faq {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #eaeaea;
+        }
+
+        .accordion-item {
+            border-color: #eaeaea;
+        }
+
+        .accordion-button {
+            font-weight: 600;
+            color: #222;
+            padding: 15px;
+        }
+
+        .accordion-button:not(.collapsed) {
+            color: #3a7f5d;
+            background-color: #f0f8f4;
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: #bcdccf;
+        }
+
+        .accordion-body {
+            padding: 15px;
+            color: #444;
+        }
+
+        /* Contact Card */
+        .contact-card {
+            background-color: #f0f8f4;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border: 1px solid #bcdccf;
+        }
+
+        .contact-info h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 5px;
+        }
+
+        .contact-info p {
+            color: #555;
+            margin-bottom: 0;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .contact-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .contact-info {
+                margin-bottom: 15px;
+            }
+
+            .pricing-plan-card {
+                margin-bottom: 15px;
+            }
+        }
+
+        .point-system-table {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .point-system-table table {
+            margin-bottom: 0;
+        }
+
+        .point-system-table th {
+            background-color: rgba(var(--primary-rgb), 0.05);
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 15px 20px;
+            border: none;
+        }
+
+        .point-system-table td {
+            padding: 15px 20px;
+            vertical-align: middle;
+            border-color: rgba(0, 0, 0, 0.05);
+            color: var(--text-primary);
+        }
+
+        .point-system-table i {
+            color: var(--primary);
+        }
+
+        .pricing-faq .accordion {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .pricing-faq .accordion-item {
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .pricing-faq .accordion-button {
+            padding: 18px 25px;
+            font-weight: 600;
+            color: var(--text-primary);
+            background-color: #fff;
+        }
+
+        .pricing-faq .accordion-button:not(.collapsed) {
+            color: var(--primary);
+            background-color: rgba(var(--primary-rgb), 0.05);
+        }
+
+        .pricing-faq .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(var(--primary-rgb), 0.2);
+        }
+
+        .pricing-faq .accordion-body {
+            padding: 20px 25px;
+            color: var(--text-secondary);
+        }
+
+        .contact-support {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .contact-support h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .contact-support p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 25px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .pricing-card.highlighted {
+                transform: scale(1.02);
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+
+            .pricing-card.highlighted:hover {
+                transform: scale(1.04) translateY(-5px);
+            }
+
+            .pricing-title {
+                font-size: 2rem;
+            }
+
+            .contact-support {
+                padding: 25px;
+            }
+        }
+
+        /* Fix for tab overflow issues */
+        .tab-content {
+            width: 100%;
+        }
+
+        .tab-pane {
+            overflow-y: auto;
+            padding-bottom: 50px;
+            min-height: calc(100vh - 76px);
+        }
+
+        /* Make sure tables don't overflow */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        /* Fix for mobile scroll issues */
+        @media (max-width: 768px) {
+            .tab-pane {
+                height: calc(100vh - 60px);
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Additional layout fixes for the pricing page */
+        .tab-content {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 76px);
+            /* Account for navbar height */
+            overflow: hidden;
+        }
+
+        .tab-pane {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 0 50px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-pane.fade {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .tab-pane.fade.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Adjust card spacing for better fit */
+        .pricing-plan-card {
+            margin-bottom: 15px;
+            min-height: auto;
+        }
+
+        /* Make the contact card responsive */
+        @media (max-width: 768px) {
+            .contact-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+
+            .contact-info {
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .pricing-container {
+                padding: 10px;
+            }
+
+            .cost-table th,
+            .cost-table td {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Make sure cards don't stretch too much on large screens */
+        @media (min-width: 992px) {
+            .row-cols-md-3>.col {
+                flex: 0 0 33.333333%;
+                max-width: 33.333333%;
+            }
+
+            .pricing-plan-card {
+                max-height: none;
+            }
+        }
+
+        /* Ensure all tab content is fully scrollable with no conflicts */
+        body {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .tab-content {
+            width: 100%;
+            height: calc(100vh - 76px);
+            overflow-y: hidden;
+        }
+
+        .tab-pane {
+            height: 100%;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 50px;
+        }
+
+        /* Improve mobile experience */
+        @media (max-width: 768px) {
+            .pricing-container {
+                padding: 10px 5px;
+            }
+
+            .cost-table-container,
+            .pricing-faq,
+            .contact-card {
+                margin-left: 5px;
+                margin-right: 5px;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* FAQ Tab Styles */
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .faq-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+        }
+
+        .faq-subtitle {
+            font-size: 1rem;
+            color: #555;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .faq-categories {
+            margin-bottom: 30px;
+        }
+
+        .faq-categories .nav-pills {
+            gap: 10px;
+        }
+
+        .faq-categories .nav-link {
+            border-radius: 20px;
+            padding: 8px 20px;
+            color: #444;
+            background-color: #f0f0f0;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .faq-categories .nav-link:hover {
+            background-color: #e0e0e0;
+        }
+
+        .faq-categories .nav-link.active {
+            background-color: #3a7f5d;
+            color: white;
+        }
+
+        .faq-categories .nav-link i {
+            margin-right: 5px;
+        }
+
+        .faq-section {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #eaeaea;
+        }
+
+        #faqTabContent .accordion-item:first-of-type {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        #faqTabContent .accordion-item:last-of-type {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        #faqTabContent .accordion-button {
+            padding: 15px 20px;
+            font-weight: 600;
+            color: #222;
+            background-color: #fff;
+        }
+
+        #faqTabContent .accordion-button:not(.collapsed) {
+            color: #3a7f5d;
+            background-color: #f0f8f4;
+        }
+
+        #faqTabContent .accordion-button:focus {
+            box-shadow: none;
+            border-color: #bcdccf;
+        }
+
+        #faqTabContent .accordion-body {
+            padding: 15px 20px;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        /* Navbar layout improvements */
+        .navbar {
+            padding: 10px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .navbar-brand {
+            padding-left: 15px;
+        }
+
+        .navbar-collapse {
+            transition: all 0.3s ease;
+        }
+
+        .navbar-collapse.show {
+            background-color: white;
+            padding: 15px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 991px) {
+            .navbar-tabs {
+                flex-direction: column;
+                width: 100%;
+                padding: 10px 0;
+            }
+
+            .navbar-tab {
+                width: 100%;
+                text-align: left;
+                padding: 12px 15px;
+                margin: 3px 0;
+                border-radius: 8px;
+            }
+
+            .navbar-nav {
+                margin-top: 15px;
+                border-top: 1px solid #f0f0f0;
+                padding-top: 15px;
+            }
+
+            .premium-points-link {
+                margin-left: 0;
+                margin-bottom: 10px;
+                display: inline-block;
+            }
+
+            .user-profile {
+                display: flex !important;
+                align-items: center;
+                width: 100%;
+            }
+
+            .navbar-collapse.show .navbar-nav {
+                width: 100%;
+            }
+        }
+
+        /* Make sure the content area adjusts when navbar expands */
+        .tab-content {
+            transition: padding-top 0.3s ease;
+        }
+
+        @media (max-width: 991px) {
+            body.menu-open .tab-content {
+                padding-top: 20px;
+            }
+        }
     </style>
 </head>
 
@@ -92,18 +765,25 @@
                         <i class="bi bi-phone"></i>
                         <span>Sessions</span>
                     </a>
+                    <a href="#" class="navbar-tab" data-bs-toggle="tab" data-bs-target="#pricing">
+                        <i class="bi bi-tag"></i>
+                        <span>Pricing</span>
+                    </a>
+                    <a href="#" class="navbar-tab" data-bs-toggle="tab" data-bs-target="#faq">
+                        <i class="bi bi-question-circle"></i>
+                        <span>FAQ</span>
+                    </a>
                     <a href="#" class="navbar-tab" data-bs-toggle="tab" data-bs-target="#api-docs">
                         <i class="bi bi-code-slash"></i>
-                        <span>API Docs</span>
+                        <span>API</span>
                     </a>
-
                 </div>
                 <ul class="navbar-nav ms-auto">
                     <!-- Premium Points Display (Outside user-info, inside the main link) -->
                     <a href="https://wa.me/201011508719" target="_blank" class="premium-points-link">
                         <div class="premium-points-display" id="user-points-display">
                             <i class="bi bi-gem"></i> <!-- Changed icon -->
-                            <span id="points-balance">0.00</span> EGP <!-- Removed "Points:", added EGP -->
+                            <span id="points-balance">0.00</span> <!-- Removed "Points:", added EGP -->
                         </div>
                     </a>
                     <li class="nav-item dropdown">
@@ -140,7 +820,7 @@
     <div class="mobile-menu-overlay"></div>
 
     <!-- Tab Content -->
-    <div class="tab-content" id="dashboardTabsContent">
+    <div class="tab-content" id="tabContent">
         <!-- Sessions Tab -->
         <div class="tab-pane fade show active" id="sessions" role="tabpanel">
             <div class="session-stats">
@@ -188,6 +868,436 @@
             </div>
         </div>
 
+        <!-- Pricing Tab -->
+        <div class="tab-pane fade" id="pricing" role="tabpanel">
+            <div class="pricing-container">
+                <div class="pricing-header text-center mb-4">
+                    <h2 class="pricing-title">Pricing</h2>
+                    <p class="pricing-subtitle">Pay only for what you use with our flexible point system</p>
+                </div>
+
+                <!-- Pricing Plans -->
+                <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
+                    <!-- Starter Plan -->
+                    <div class="col">
+                        <div class="pricing-plan-card">
+                            <div class="plan-header">
+                                <div class="plan-icon">
+                                    <i class="bi bi-rocket"></i>
+                                </div>
+                                <h3>Starter</h3>
+                                <div class="plan-price">
+                                    <span class="currency">EGP</span>
+                                    <span class="amount">50</span>
+                                </div>
+                                <p class="plan-description">Get started with WhatsApp automation</p>
+                            </div>
+                            <div class="plan-features">
+                                <ul>
+                                    <li><i class="bi bi-gem"></i> <strong>50 points included</strong></li>
+                                    <li><i class="bi bi-check-circle"></i> Unlimited WhatsApp sessions</li>
+                                    <li><i class="bi bi-check-circle"></i> Advanced auto-reply rules</li>
+                                    <li><i class="bi bi-check-circle"></i> Bulk messaging capabilities</li>
+                                    <li><i class="bi bi-check-circle"></i> Contact management</li>
+                                    <li><i class="bi bi-check-circle"></i> Media messages support</li>
+                                    <li><i class="bi bi-check-circle"></i> API access</li>
+                                    <li><i class="bi bi-check-circle"></i> 24/7 Support</li>
+                                </ul>
+                                <a href="https://wa.me/201011508719" class="btn btn-outline-primary w-100">Get
+                                    Started</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pro Plan -->
+                    <div class="col">
+                        <div class="pricing-plan-card popular">
+                            <div class="popular-tag">Most Popular</div>
+                            <div class="plan-header">
+                                <div class="plan-icon">
+                                    <i class="bi bi-star"></i>
+                                </div>
+                                <h3>Professional</h3>
+                                <div class="plan-price">
+                                    <span class="currency">EGP</span>
+                                    <span class="amount">100</span>
+                                </div>
+                                <p class="plan-description">For businesses with moderate messaging needs</p>
+                            </div>
+                            <div class="plan-features">
+                                <ul>
+                                    <li><i class="bi bi-gem"></i> <strong>120 points included</strong></li>
+                                    <li><i class="bi bi-check-circle"></i> Unlimited WhatsApp sessions</li>
+                                    <li><i class="bi bi-check-circle"></i> Advanced auto-reply rules</li>
+                                    <li><i class="bi bi-check-circle"></i> Bulk messaging capabilities</li>
+                                    <li><i class="bi bi-check-circle"></i> Contact management</li>
+                                    <li><i class="bi bi-check-circle"></i> Media messages support</li>
+                                    <li><i class="bi bi-check-circle"></i> API access</li>
+                                    <li><i class="bi bi-check-circle"></i> 24/7 Support</li>
+                                </ul>
+                                <a href="https://wa.me/201011508719" class="btn btn-primary w-100">Upgrade Now</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enterprise Plan -->
+                    <div class="col">
+                        <div class="pricing-plan-card">
+                            <div class="plan-header">
+                                <div class="plan-icon">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <h3>Enterprise</h3>
+                                <div class="plan-price">
+                                    <span class="currency">EGP</span>
+                                    <span class="amount">250</span>
+                                </div>
+                                <p class="plan-description">For businesses with high volume needs</p>
+                            </div>
+                            <div class="plan-features">
+                                <ul>
+                                    <li><i class="bi bi-gem"></i> <strong>350 points included</strong></li>
+                                    <li><i class="bi bi-check-circle"></i> Unlimited WhatsApp sessions</li>
+                                    <li><i class="bi bi-check-circle"></i> Advanced auto-reply rules</li>
+                                    <li><i class="bi bi-check-circle"></i> Bulk messaging capabilities</li>
+                                    <li><i class="bi bi-check-circle"></i> Contact management</li>
+                                    <li><i class="bi bi-check-circle"></i> Media messages support</li>
+                                    <li><i class="bi bi-check-circle"></i> API access</li>
+                                    <li><i class="bi bi-check-circle"></i> 24/7 Support</li>
+                                </ul>
+                                <a href="https://wa.me/201011508719" class="btn btn-outline-primary w-100">Contact
+                                    Sales</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Point Costs Table -->
+                <div class="cost-table-container">
+                    <h3 class="section-title">Point System Costs</h3>
+                    <div class="table-responsive">
+                        <table class="table cost-table">
+                            <thead>
+                                <tr>
+                                    <th>Feature</th>
+                                    <th>Cost</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><i class="bi bi-plus-circle"></i> Create Session</td>
+                                    <td><span class="cost-badge">5</span><i class="bi bi-gem"></i></td>
+                                    <td>One-time cost per WhatsApp session</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-chat"></i> Send Message</td>
+                                    <td><span class="cost-badge">0.1</span><i class="bi bi-gem"></i></td>
+                                    <td>Per message sent</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-reply"></i> Auto-Reply</td>
+                                    <td><span class="cost-badge">0.05</span><i class="bi bi-gem"></i></td>
+                                    <td>Per automatic reply sent</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-people"></i> Fetch Contacts</td>
+                                    <td><span class="cost-badge">1</span><i class="bi bi-gem"></i></td>
+                                    <td>Per contacts list fetch</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-people-fill"></i> Fetch Group Members</td>
+                                    <td><span class="cost-badge">1</span><i class="bi bi-gem"></i></td>
+                                    <td>Per group members fetch</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-gear"></i> Create Auto-Reply Rule</td>
+                                    <td><span class="cost-badge">2</span><i class="bi bi-gem"></i></td>
+                                    <td>One-time cost per rule</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Simplified Contact -->
+                <div class="contact-card">
+                    <div class="contact-info">
+                        <h3>Need Help?</h3>
+                        <p>Our support team is ready to assist you</p>
+                    </div>
+                    <a href="https://wa.me/201011508719" class="btn btn-primary">
+                        <i class="bi bi-whatsapp"></i> Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Tab -->
+        <div class="tab-pane fade" id="faq" role="tabpanel">
+            <div class="faq-container">
+                <div class="faq-header text-center mb-4">
+                    <h2 class="faq-title">Frequently Asked Questions</h2>
+                    <p class="faq-subtitle">Find answers to common questions about using Zynchat</p>
+                </div>
+
+                <!-- FAQ Categories -->
+                <div class="faq-categories mb-4">
+                    <ul class="nav nav-pills justify-content-center" id="faqTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="general-tab" data-bs-toggle="pill" data-bs-target="#general"
+                                type="button" role="tab">
+                                <i class="bi bi-info-circle"></i> General
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pricing-tab" data-bs-toggle="pill"
+                                data-bs-target="#pricingFaqs" type="button" role="tab">
+                                <i class="bi bi-tag"></i> Pricing
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="technical-tab" data-bs-toggle="pill"
+                                data-bs-target="#technical" type="button" role="tab">
+                                <i class="bi bi-gear"></i> Technical
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- FAQ Content -->
+                <div class="tab-content" id="faqTabContent">
+                    <!-- General FAQs -->
+                    <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                        <div class="faq-section">
+                            <div class="accordion" id="generalFaqs">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#generalOne">
+                                            What is Zynchat?
+                                        </button>
+                                    </h2>
+                                    <div id="generalOne" class="accordion-collapse collapse show"
+                                        data-bs-parent="#generalFaqs">
+                                        <div class="accordion-body">
+                                            Zynchat is a WhatsApp automation platform that allows businesses to connect,
+                                            send messages, and create automated replies through a simple web interface.
+                                            It helps you efficiently manage your WhatsApp communications.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#generalTwo">
+                                            How do I get started?
+                                        </button>
+                                    </h2>
+                                    <div id="generalTwo" class="accordion-collapse collapse"
+                                        data-bs-parent="#generalFaqs">
+                                        <div class="accordion-body">
+                                            Getting started is easy. First, sign up for an account. Then create a
+                                            WhatsApp session by scanning a QR code with your phone. Once connected, you
+                                            can send messages, create auto-replies, and explore other features.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#generalThree">
+                                            Is Zynchat an official WhatsApp service?
+                                        </button>
+                                    </h2>
+                                    <div id="generalThree" class="accordion-collapse collapse"
+                                        data-bs-parent="#generalFaqs">
+                                        <div class="accordion-body">
+                                            No, Zynchat is not an official WhatsApp service. We are a third-party
+                                            platform that provides useful tools and services for interacting with
+                                            WhatsApp. Our platform is designed for legitimate business use only and
+                                            complies with WhatsApp's terms of service.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#generalFour">
+                                            Can I use my existing WhatsApp account?
+                                        </button>
+                                    </h2>
+                                    <div id="generalFour" class="accordion-collapse collapse"
+                                        data-bs-parent="#generalFaqs">
+                                        <div class="accordion-body">
+                                            Yes, you can use your existing WhatsApp account by scanning the QR code with
+                                            your phone. This will connect your WhatsApp to our platform, allowing you to
+                                            send and receive messages through our interface.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing FAQs -->
+                    <div class="tab-pane fade" id="pricingFaqs" role="tabpanel" aria-labelledby="pricing-tab">
+                        <div class="faq-section">
+                            <div class="accordion" id="pricingAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#pricingOne">
+                                            How do points work?
+                                        </button>
+                                    </h2>
+                                    <div id="pricingOne" class="accordion-collapse collapse show"
+                                        data-bs-parent="#pricingAccordion">
+                                        <div class="accordion-body">
+                                            Points are deducted when you perform actions like sending messages or
+                                            creating sessions. For example, sending a message costs 0.1 points, while
+                                            creating a new session costs 5 points. Points never expire, and you can add
+                                            more at any time.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#pricingTwo">
+                                            Can I upgrade my plan?
+                                        </button>
+                                    </h2>
+                                    <div id="pricingTwo" class="accordion-collapse collapse"
+                                        data-bs-parent="#pricingAccordion">
+                                        <div class="accordion-body">
+                                            Yes, you can upgrade or downgrade your plan at any time. When upgrading,
+                                            you'll receive the additional points immediately. When downgrading, your
+                                            current points balance will remain intact.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#pricingThree">
+                                            Do you offer custom plans?
+                                        </button>
+                                    </h2>
+                                    <div id="pricingThree" class="accordion-collapse collapse"
+                                        data-bs-parent="#pricingAccordion">
+                                        <div class="accordion-body">
+                                            Yes, for businesses with specific needs. Contact our sales team to discuss
+                                            your requirements, and we'll create a tailored solution for you.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#pricingFour">
+                                            What payment methods do you accept?
+                                        </button>
+                                    </h2>
+                                    <div id="pricingFour" class="accordion-collapse collapse"
+                                        data-bs-parent="#pricingAccordion">
+                                        <div class="accordion-body">
+                                            We accept credit/debit cards, PayPal, and bank transfers. For enterprise
+                                            plans, we can also accommodate purchase orders and other custom payment
+                                            arrangements.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Technical FAQs -->
+                    <div class="tab-pane fade" id="technical" role="tabpanel" aria-labelledby="technical-tab">
+                        <div class="faq-section">
+                            <div class="accordion" id="technicalFaqs">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#technicalOne">
+                                            How many devices can I connect?
+                                        </button>
+                                    </h2>
+                                    <div id="technicalOne" class="accordion-collapse collapse show"
+                                        data-bs-parent="#technicalFaqs">
+                                        <div class="accordion-body">
+                                            The number of devices you can connect depends on your plan. Basic plans
+                                            allow up to 10 WhatsApp sessions, while the Professional and Enterprise
+                                            plans support unlimited sessions.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#technicalTwo">
+                                            Is there an API available?
+                                        </button>
+                                    </h2>
+                                    <div id="technicalTwo" class="accordion-collapse collapse"
+                                        data-bs-parent="#technicalFaqs">
+                                        <div class="accordion-body">
+                                            Yes, we provide a comprehensive API that allows you to integrate Zynchat
+                                            with your own applications. You can find detailed documentation in the API
+                                            Docs tab.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#technicalThree">
+                                            What happens if I lose connection?
+                                        </button>
+                                    </h2>
+                                    <div id="technicalThree" class="accordion-collapse collapse"
+                                        data-bs-parent="#technicalFaqs">
+                                        <div class="accordion-body">
+                                            Our system automatically attempts to reconnect if your WhatsApp session
+                                            disconnects. If reconnection is not possible, you'll need to scan the QR
+                                            code again to reestablish the connection.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#technicalFour">
+                                            Can I send messages to multiple recipients?
+                                        </button>
+                                    </h2>
+                                    <div id="technicalFour" class="accordion-collapse collapse"
+                                        data-bs-parent="#technicalFaqs">
+                                        <div class="accordion-body">
+                                            Yes, you can send messages to multiple recipients at once by entering phone
+                                            numbers separated by line breaks in the messaging interface. Each message
+                                            sent will be counted as a separate point cost.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Support -->
+                <div class="contact-card mt-4">
+                    <div class="contact-info">
+                        <h3>Still have questions?</h3>
+                        <p>Our support team is ready to assist you with any other questions</p>
+                    </div>
+                    <a href="https://wa.me/201011508719" class="btn btn-primary">
+                        <i class="bi bi-whatsapp"></i> Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- API Docs Tab -->
         <div class="tab-pane fade" id="api-docs" role="tabpanel">
             <div class="api-container">
@@ -198,22 +1308,25 @@
                     </div>
                     <div class="sidebar-tabs">
                         <button class="sidebar-tab active" data-target="#auth-section">
-                            <i class="bi bi-shield-lock"></i>Authentication
+                            <i class="bi bi-key"></i> <span>Authentication</span>
                         </button>
                         <button class="sidebar-tab" data-target="#sessions-section">
-                            <i class="bi bi-phone"></i>Sessions
+                            <i class="bi bi-phone"></i> <span>Sessions</span>
                         </button>
                         <button class="sidebar-tab" data-target="#messaging-section">
-                            <i class="bi bi-chat-dots"></i>Messaging
+                            <i class="bi bi-chat-dots"></i> <span>Messaging</span>
                         </button>
                         <button class="sidebar-tab" data-target="#contacts-section">
-                            <i class="bi bi-person-lines-fill"></i>Contacts
+                            <i class="bi bi-people"></i> <span>Contacts</span>
+                        </button>
+                        <button class="sidebar-tab" data-target="#number-checker-section">
+                            <i class="bi bi-check-circle"></i> <span>Number Checker</span>
                         </button>
                         <button class="sidebar-tab" data-target="#auto-reply-section">
-                            <i class="bi bi-reply-all"></i>Auto-Reply
+                            <i class="bi bi-reply"></i> <span>Auto-Reply</span>
                         </button>
                         <button class="sidebar-tab" data-target="#me-section">
-                            <i class="bi bi-person-badge"></i>Get User Info
+                            <i class="bi bi-person"></i> <span>User Info</span>
                         </button>
                     </div>
                 </div>
@@ -445,6 +1558,49 @@
 
                                 <button class="action-button" onclick="runApiRequest('get-group-members')">
                                     <i class="bi bi-people-fill me-2"></i>Get Group Members
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Number Checker Section -->
+                    <div class="main-content" id="number-checker-section">
+                        <!-- Check WhatsApp Numbers -->
+                        <div class="api-card">
+                            <div class="api-card-header">
+                                <div class="api-card-icon check-icon">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="api-card-title">
+                                    <h3>Check WhatsApp Numbers</h3>
+                                    <span class="api-method method-post">POST</span>
+                                    <span class="api-endpoint">/api/check-numbers</span>
+                                </div>
+                            </div>
+                            <div class="api-card-body">
+                                <p>Verify if phone numbers are registered on WhatsApp. This helps avoid sending messages
+                                    to non-existent numbers.</p>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Session ID</label>
+                                        <input type="text" class="parameter-input" id="check-numbers-session-id"
+                                            placeholder="Enter your WhatsApp session ID">
+                                        <div class="form-text">Required. The ID of an active WhatsApp session.</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="parameter-group">
+                                        <label class="parameter-label">Phone Numbers</label>
+                                        <textarea class="parameter-input" id="check-numbers-phone-list" rows="5"
+                                            placeholder="Enter phone numbers (one per line) with country code"></textarea>
+                                        <div class="form-text">Required. List of phone numbers to check, one per line.
+                                            Include country code.</div>
+                                    </div>
+                                </div>
+                                <button class="action-button" id="check-numbers-btn">
+                                    <i class="bi bi-check2-all me-2"></i>Check Numbers
                                 </button>
                             </div>
                         </div>
@@ -922,28 +2078,45 @@ https://zynchat.koyeb.app/api/check-sessions \
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const navbarNav = document.getElementById('navbarNav');
             const body = document.body;
+            const navbarTabs = document.querySelectorAll('.navbar-tab');
 
             function toggleMobileMenu() {
                 navbarNav.classList.toggle('show');
                 body.classList.toggle('menu-open');
+
+                // Add aria attributes for accessibility
+                const isExpanded = navbarNav.classList.contains('show');
+                mobileMenuToggle.setAttribute('aria-expanded', isExpanded);
             }
 
             mobileMenuToggle.addEventListener('click', toggleMobileMenu);
 
             // Close menu when clicking on a nav link
-            document.querySelectorAll('.navbar-tab, .dropdown-item').forEach(link => {
+            navbarTabs.forEach(link => {
                 link.addEventListener('click', () => {
-                    if (window.innerWidth < 992) {
-                        toggleMobileMenu();
+                    if (window.innerWidth < 992 && navbarNav.classList.contains('show')) {
+                        setTimeout(() => {
+                            toggleMobileMenu();
+                        }, 150); // Small delay for better UX
                     }
                 });
             });
 
+            // Close menu when clicking outside
+            document.addEventListener('click', function (event) {
+                const isClickInside = navbarNav.contains(event.target) || mobileMenuToggle.contains(event.target);
+
+                if (!isClickInside && navbarNav.classList.contains('show')) {
+                    toggleMobileMenu();
+                }
+            });
+
             // Close menu on window resize if it's larger than mobile
             window.addEventListener('resize', () => {
-                if (window.innerWidth >= 992) {
+                if (window.innerWidth >= 992 && navbarNav.classList.contains('show')) {
                     navbarNav.classList.remove('show');
                     body.classList.remove('menu-open');
+                    mobileMenuToggle.setAttribute('aria-expanded', false);
                 }
             });
         });
@@ -1141,7 +2314,14 @@ https://zynchat.koyeb.app/api/check-sessions \
                                     <div class="session-icon">
                                         <i class="bi bi-whatsapp"></i>
                                     </div>
-                                    <h5 class="session-title"># ${session.sessionId}</h5>
+                                    <div class="session-title-container">
+                                        <h5 class="session-title d-flex align-items-center">
+                                            <span id="session-id-${session.sessionId}"># ${session.sessionId}</span>
+                                            <button class="session-copy-btn" onclick="copySessionId('${session.sessionId}')" title="Copy Session ID">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </h5>
+                                    </div>
                                     <button class="session-delete-btn" onclick="deleteSession('${session.sessionId}')" title="Delete Session">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -1292,6 +2472,30 @@ https://zynchat.koyeb.app/api/check-sessions \
                 .catch(err => {
                     console.error('Failed to copy: ', err);
                     showToast('Failed to copy', 'danger');
+                });
+        }
+
+        // Function to copy session ID with visual feedback
+        function copySessionId(sessionId) {
+            navigator.clipboard.writeText(sessionId)
+                .then(() => {
+                    // Show success animation/indicator
+                    const button = document.querySelector(`button[onclick="copySessionId('${sessionId}')"]`);
+                    const originalIcon = button.innerHTML;
+
+                    button.innerHTML = '<i class="bi bi-check"></i>';
+                    button.classList.add('copy-success');
+
+                    setTimeout(() => {
+                        button.innerHTML = originalIcon;
+                        button.classList.remove('copy-success');
+                    }, 2000);
+
+                    showToast('Session ID copied to clipboard!', 'success');
+                })
+                .catch(err => {
+                    console.error('Failed to copy session ID: ', err);
+                    showToast('Failed to copy session ID', 'danger');
                 });
         }
 
@@ -1547,6 +2751,20 @@ https://zynchat.koyeb.app/api/get-contacts \\
 -H 'Content-Type: application/json' \\
 -d '${JSON.stringify(contactsPayload, null, 2)}'`;
                     }
+                    break;
+
+                case '#number-checker-section':
+                    const checkNumbersSessionId = getValue('check-numbers-session-id', 'SESSION_ID');
+                    const phoneNumbers = getValue('check-numbers-phone-list', '+201234567890\n+209876543210');
+
+                    curlCommand = `curl -X POST \\
+https://zynchat.koyeb.app/api/check-numbers \\
+-H 'Authorization: Bearer ${token}' \\
+-H 'Content-Type: application/json' \\
+-d '{
+  "sessionId": "${checkNumbersSessionId}",
+  "numbers": "${phoneNumbers}"
+}'`;
                     break;
 
                 case '#auto-reply-section':
@@ -1914,6 +3132,329 @@ https://zynchat.koyeb.app/api/auth/me \\
                     sidebar.classList.toggle('expanded');
                 });
             }
+        });
+    </script>
+
+    <!-- Number Checker JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Number Checker functionality
+            const checkerSessionSelect = document.getElementById('checker-session-select');
+            const numbersToCheck = document.getElementById('numbers-to-check');
+            const numberCheckerForm = document.getElementById('number-checker-form');
+            const checkNumbersBtn = document.getElementById('check-numbers-btn');
+            const checkResultsCard = document.getElementById('check-results-card');
+            const checkResultsTable = document.getElementById('check-results-table');
+            const checkSummary = document.getElementById('check-summary');
+            const copyAllValidBtn = document.getElementById('copy-all-valid-btn');
+            const exportResultsBtn = document.getElementById('export-results-btn');
+
+            // Populate sessions in the checker form
+            function populateCheckerSessions() {
+                const sessions = JSON.parse(localStorage.getItem('sessions') || '[]');
+                checkerSessionSelect.innerHTML = '<option value="">Select a session</option>';
+
+                sessions.forEach(session => {
+                    if (session.status === 'connected') {
+                        const option = document.createElement('option');
+                        option.value = session.sessionId;
+                        option.textContent = `${session.sessionId} (${session.phoneNumber || 'Connecting...'})`;
+                        checkerSessionSelect.appendChild(option);
+                    }
+                });
+            }
+
+            // Call populateCheckerSessions when dashboard loads and when sessions are refreshed
+            populateCheckerSessions();
+            document.addEventListener('sessions-updated', populateCheckerSessions);
+
+            // Handle Number Checker Form Submit
+            numberCheckerForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const sessionId = checkerSessionSelect.value;
+                const numbers = numbersToCheck.value.trim();
+
+                if (!sessionId) {
+                    showToast('Please select a session', 'danger');
+                    return;
+                }
+
+                if (!numbers) {
+                    showToast('Please enter at least one number to check', 'danger');
+                    return;
+                }
+
+                try {
+                    // Show loading state
+                    checkNumbersBtn.disabled = true;
+                    checkNumbersBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Checking...';
+
+                    // Make API call to check numbers
+                    const response = await fetch('/api/check-numbers', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({
+                            sessionId,
+                            numbers
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to check numbers');
+                    }
+
+                    // Display results
+                    displayNumberCheckResults(data);
+
+                } catch (error) {
+                    showToast(error.message, 'danger');
+                } finally {
+                    // Reset button state
+                    checkNumbersBtn.disabled = false;
+                    checkNumbersBtn.innerHTML = '<i class="bi bi-check2-all me-2"></i>Check Numbers';
+                }
+            });
+
+            // Display number check results
+            function displayNumberCheckResults(data) {
+                // Clear previous results
+                checkResultsTable.innerHTML = '';
+
+                // Show results card
+                checkResultsCard.style.display = 'block';
+
+                // Add summary
+                const { total, valid, invalid } = data.summary;
+                checkSummary.innerHTML = `
+                    <div class="alert alert-success">
+                        <h5 class="alert-heading">Check Summary</h5>
+                        <p class="mb-0">
+                            Total numbers checked: <strong>${total}</strong><br>
+                            Valid WhatsApp numbers: <strong>${valid}</strong><br>
+                            Invalid or non-WhatsApp numbers: <strong>${invalid}</strong>
+                        </p>
+                    </div>
+                `;
+
+                // Add results to table
+                data.results.forEach(result => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${result.number}</td>
+                        <td>
+                            ${result.exists ?
+                            '<span class="badge bg-success">Valid</span>' :
+                            '<span class="badge bg-danger">Invalid</span>'}
+                        </td>
+                        <td>
+                            ${result.exists ?
+                            `<button class="btn btn-sm btn-outline-primary copy-number-btn" data-number="${result.number}">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                                <button class="btn btn-sm btn-outline-success message-number-btn" data-number="${result.number}">
+                                    <i class="bi bi-chat"></i> Message
+                                </button>` :
+                            'N/A'}
+                        </td>
+                    `;
+                    checkResultsTable.appendChild(row);
+                });
+
+                // Add event listeners to the copy and message buttons
+                document.querySelectorAll('.copy-number-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const number = this.getAttribute('data-number');
+                        navigator.clipboard.writeText(number)
+                            .then(() => {
+                                this.innerHTML = '<i class="bi bi-check"></i> Copied';
+                                setTimeout(() => {
+                                    this.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+                                }, 2000);
+                            })
+                            .catch(err => {
+                                showToast('Failed to copy: ' + err, 'danger');
+                            });
+                    });
+                });
+
+                document.querySelectorAll('.message-number-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const number = this.getAttribute('data-number');
+                        // Switch to the bulk messaging tab with this number pre-filled
+                        // NOTE: You'll need to add a bulk messaging tab or redirect to an appropriate feature
+                        showToast(`Ready to message ${number}`, 'info');
+                        // You can add code here to navigate to your messaging interface
+                    });
+                });
+
+                // Scroll to results
+                checkResultsCard.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Copy all valid numbers
+            copyAllValidBtn.addEventListener('click', function () {
+                const validNumbers = Array.from(checkResultsTable.querySelectorAll('tr'))
+                    .filter(row => row.querySelector('.badge.bg-success'))
+                    .map(row => row.cells[0].textContent)
+                    .join('\n');
+
+                if (validNumbers) {
+                    navigator.clipboard.writeText(validNumbers)
+                        .then(() => {
+                            showToast('All valid numbers copied to clipboard', 'success');
+                        })
+                        .catch(err => {
+                            showToast('Failed to copy: ' + err, 'danger');
+                        });
+                } else {
+                    showToast('No valid numbers to copy', 'warning');
+                }
+            });
+
+            // Export results as CSV
+            exportResultsBtn.addEventListener('click', function () {
+                const rows = Array.from(checkResultsTable.querySelectorAll('tr'));
+
+                if (rows.length === 0) {
+                    showToast('No results to export', 'warning');
+                    return;
+                }
+
+                const csvContent = [
+                    'Phone Number,Status',
+                    ...rows.map(row => {
+                        const number = row.cells[0].textContent;
+                        const isValid = row.querySelector('.badge.bg-success') ? 'Valid' : 'Invalid';
+                        return `${number},${isValid}`;
+                    })
+                ].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                a.setAttribute('download', `whatsapp_check_results_${new Date().toISOString().split('T')[0]}.csv`);
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        });
+    </script>
+
+    <!-- Number Checker Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Elements
+            const checkNumbersBtn = document.getElementById('check-numbers-btn');
+            const sessionIdInput = document.getElementById('check-numbers-session-id');
+            const phoneListInput = document.getElementById('check-numbers-phone-list');
+
+            // Check Numbers functionality
+            checkNumbersBtn.addEventListener('click', async function () {
+                const sessionId = sessionIdInput.value.trim();
+                const numbers = phoneListInput.value.trim();
+
+                if (!sessionId) {
+                    showToast('Please enter a session ID', 'warning');
+                    return;
+                }
+
+                if (!numbers) {
+                    showToast('Please enter at least one phone number', 'warning');
+                    return;
+                }
+
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Checking...';
+
+                try {
+                    const response = await fetch('/api/check-numbers', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({
+                            sessionId,
+                            numbers
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to check numbers');
+                    }
+
+                    // Use the shared response element
+                    const responseCodeElement = document.getElementById('response-code');
+                    if (responseCodeElement) {
+                        // Format and display response in the shared element
+                        responseCodeElement.textContent = JSON.stringify(data, null, 2);
+                    }
+
+                    // Update status indicator in the shared response section
+                    const statusElement = document.querySelector('.status-code');
+                    if (statusElement) {
+                        statusElement.textContent = '200 OK';
+                        statusElement.className = 'status-code status-success';
+                    }
+
+                    showToast(`Successfully checked ${data.summary.total} numbers`, 'success');
+
+                    // Update the curl command by triggering updateCurlCommand function
+                    updateCurlCommand();
+
+                } catch (error) {
+                    // Update shared response element with error
+                    const responseCodeElement = document.getElementById('response-code');
+                    if (responseCodeElement) {
+                        responseCodeElement.textContent = JSON.stringify({
+                            success: false,
+                            error: error.message
+                        }, null, 2);
+                    }
+
+                    // Update status indicator in shared element
+                    const statusElement = document.querySelector('.status-code');
+                    if (statusElement) {
+                        statusElement.textContent = '400 Error';
+                        statusElement.className = 'status-code status-error';
+                    }
+
+                    showToast(error.message, 'danger');
+                } finally {
+                    // Reset button state
+                    this.disabled = false;
+                    this.innerHTML = 'Check Numbers';
+                }
+            });
+
+            // Auto-populate session ID if available
+            function populateSessionSelector() {
+                const sessions = JSON.parse(localStorage.getItem('sessions') || '[]');
+                const connectedSessions = sessions.filter(s => s.status === 'connected');
+
+                if (connectedSessions.length > 0 && !sessionIdInput.value) {
+                    sessionIdInput.value = connectedSessions[0].sessionId;
+                }
+            }
+
+            // Call when API tab becomes active
+            document.querySelectorAll('.navbar-tab').forEach(tab => {
+                if (tab.getAttribute('data-bs-target') === '#api-docs') {
+                    tab.addEventListener('shown.bs.tab', populateSessionSelector);
+                }
+            });
+
+            // Also call when sidebar tab for number checker is clicked
+            document.querySelector('.sidebar-tab[data-target="#number-checker-section"]').addEventListener('click', populateSessionSelector);
         });
     </script>
 </body>

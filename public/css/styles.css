@@ -526,10 +526,48 @@ body {
 }
 
 .session-title {
-    font-weight: 600;
-    margin-bottom: 0;
-    color: var(--dark-color);
-    font-size: 1rem;
+    margin: 0;
+    flex: 1;
+    font-size: 16px;
+}
+
+.session-title-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.session-title-container:hover .session-copy-btn {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.session-copy-btn {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    opacity: 0.5;
+    transform: translateX(-5px);
+}
+
+.session-copy-btn:hover {
+    background-color: rgba(73, 204, 144, 0.1);
+    color: var(--primary-color);
+}
+
+.session-copy-btn.copy-success {
+    background-color: rgba(73, 204, 144, 0.15);
+    color: var(--primary-color);
 }
 
 .session-delete-btn {
@@ -2677,6 +2715,45 @@ body {
     font-size: 16px;
 }
 
+.session-title-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.session-title-container:hover .session-copy-btn {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.session-copy-btn {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    opacity: 0.5;
+    transform: translateX(-5px);
+}
+
+.session-copy-btn:hover {
+    background-color: rgba(73, 204, 144, 0.1);
+    color: var(--primary-color);
+}
+
+.session-copy-btn.copy-success {
+    background-color: rgba(73, 204, 144, 0.15);
+    color: var(--primary-color);
+}
+
 .session-delete-btn {
     background: none;
     border: none;
@@ -2788,7 +2865,7 @@ textarea:focus {
 }
 
 @media (max-width: 992px) {
-    
+
     .api-container {
         grid-template-columns: var(--sidebar-width) 1fr;
         grid-template-rows: auto auto;
@@ -2821,6 +2898,7 @@ textarea:focus {
     .sidebar-header i {
         display: none;
     }
+
     :root {
         --sidebar-width: 180px;
     }
@@ -2874,6 +2952,7 @@ textarea:focus {
     .sidebar-header i {
         display: none;
     }
+
     .api-container {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
@@ -4874,6 +4953,7 @@ textarea.form-control {
         overflow: hidden;
     }
 }
+
 .navbar-brand {
     display: flex;
     align-items: center;

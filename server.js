@@ -33,6 +33,7 @@ const COSTS = {
     FETCH_CONTACTS: 1,
     FETCH_GROUP_MEMBERS: 1,
     CREATE_AUTO_REPLY_RULE: 2,
+    CHECK_NUMBERS: 0.01, // Per number checked
 };
 
 // Helper function to check and deduct points
@@ -1321,6 +1322,92 @@ app.delete('/api/cancel-pending-session/:sessionId', auth, async (req, res) => {
     } catch (error) {
         console.error(`[${userId}] Error cancelling pending session ${sessionId}:`, error);
         res.status(500).json({ error: 'Internal server error during session cancellation.' });
+    }
+});
+
+// Add endpoint to check if numbers are on WhatsApp
+app.post('/api/check-numbers', auth, validatePhoneNumber, async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
+    const { sessionId, numbers } = req.body;
+    console.log('Received number check request:', { sessionId, numbers });
+
+    const session = sessions.get(sessionId);
+    if (!session) {
+        // Check if session exists in database
+        const dbSession = await Session.findOne({ sessionId, userId: req.user._id });
+        if (!dbSession) {
+            console.log(`[${req.user._id}] Session ${sessionId} not found in memory or database`);
+            return res.status(404).json({ error: 'Session not found' });
+        }
+        // If session exists in DB but not memory, it's disconnected
+        console.log(`[${req.user._id}] Session ${sessionId} found in database but not memory (disconnected)`);
+        return res.status(403).json({ error: 'Session is not active' });
+    }
+
+    // Verify session ownership
+    if (session.userId.toString() !== req.user._id.toString()) {
+        console.warn(`[${req.user._id}] Attempted to access session ${sessionId} owned by user ${session.userId}`);
+        return res.status(403).json({ error: 'You do not have permission to access this session' });
+    }
+
+    // --- Point Check ---
+    const phoneNumbers = numbers.split('\n').map(num => num.trim()).filter(num => num);
+    const cost = phoneNumbers.length * COSTS.CHECK_NUMBERS;
+    const canAfford = await deductPoints(req.user._id, cost);
+    if (!canAfford) {
+        return res.status(402).json({ error: `Insufficient points to check ${phoneNumbers.length} numbers. Required: ${cost}` });
+    }
+    // --- End Point Check ---
+
+    try {
+        const results = [];
+        const batchSize = 20; // Process in batches to avoid rate limiting
+
+        for (let i = 0; i < phoneNumbers.length; i += batchSize) {
+            const batch = phoneNumbers.slice(i, i + batchSize);
+            const batchPromises = batch.map(async (number) => {
+                try {
+                    const formattedNumber = number.replace(/\D/g, '');
+                    const jid = `${formattedNumber}@s.whatsapp.net`;
+
+                    // Check if number exists on WhatsApp using onWhatsApp method
+                    const [result] = await session.sock.onWhatsApp(formattedNumber);
+
+                    if (result && result.exists) {
+                        console.log(`Number ${formattedNumber} exists on WhatsApp`);
+                        return { number: formattedNumber, exists: true };
+                    } else {
+                        console.log(`Number ${formattedNumber} does not exist on WhatsApp`);
+                        return { number: formattedNumber, exists: false };
+                    }
+                } catch (error) {
+                    console.error('Error checking number:', number, error);
+                    return { number, exists: false, error: error.message };
+                }
+            });
+
+            // Process batch with a slight delay between batches
+            const batchResults = await Promise.all(batchPromises);
+            results.push(...batchResults);
+
+            if (i + batchSize < phoneNumbers.length) {
+                // Add a small delay between batches to prevent rate limiting
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        res.json({
+            success: true,
+            results,
+            summary: {
+                total: results.length,
+                valid: results.filter(r => r.exists).length,
+                invalid: results.filter(r => !r.exists).length
+            }
+        });
+    } catch (error) {
+        console.error('Error checking numbers:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
